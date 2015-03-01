@@ -7,9 +7,9 @@ public class NQueens{
 	return "ansorge.ethan"; 
     }
     boolean solve(){ //start from 0,0
-	return true;
+	solve(0);
     }
     boolean solve(int x){ //start with a queen in position x of the first row or column.
-	return true;
+        
     }
 }
