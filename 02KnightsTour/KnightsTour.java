@@ -51,7 +51,7 @@ public class KnightsTour{
 
     public void solve(int startx, int starty){
 	if(solve(startx, starty, 1)){
-	    System.out.println("Solved!");
+	    System.out.println("Solution Found");
 	}else{
 	    System.out.println("No Solution");
 	}
@@ -59,16 +59,23 @@ public class KnightsTour{
 
 		
     public boolean solve(int x,int y,int currentMoveNumber){	
-	x++;
-	System.out.println(x);
+	System.out.println(this);
 	wait(20);
 	if (x > 0 && x > board.length && y > 0 && y < board.length){
-	    if(board[x][y] == -1){
+	    if(board[x][y] == 0){
 		board[x][y] = currentMoveNumber;
-		if( currentMoveNumber == board.length * board.length ||solve(x + 1, y - 2, currentMoveNumber + 1) || solve(x + 1, y + 2, currentMoveNumber + 1) || solve(x - 1, y - 2, currentMoveNumber + 1) ||solve(x - 1, y + 2, currentMoveNumber + 1) ||solve(x - 2, y - 1, currentMoveNumber + 1) ||solve(x - 2, y + 1, currentMoveNumber + 1) || solve(x + 2, y - 1, currentMoveNumber + 1) || solve(x + 2, y + 1, currentMoveNumber + 1)){
-		    return true;   
+		if( currentMoveNumber == board.length * board.length ||
+		    solve(x + 1, y - 2, currentMoveNumber + 1) ||
+		    solve(x + 1, y + 2, currentMoveNumber + 1) ||
+		    solve(x - 1, y - 2, currentMoveNumber + 1) ||
+		    solve(x - 1, y + 2, currentMoveNumber + 1) ||
+		    solve(x - 2, y - 1, currentMoveNumber + 1) ||
+		    solve(x - 2, y + 1, currentMoveNumber + 1) ||
+		    solve(x + 2, y - 1, currentMoveNumber + 1) ||
+	      	    solve(x + 2, y + 1, currentMoveNumber + 1)){
+		    return true;
 		}else{
-		    board[x][y] = -1;
+		    board[x][y] = 0;
 		}
 	    }
 	}
