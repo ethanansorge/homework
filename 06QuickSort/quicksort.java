@@ -1,9 +1,9 @@
 public class quicksort{
-    int partition (int[], int start, int end){
-	int pivot = int[int[].length -1];
+    int partition (int[] ary, int start, int end){
+	int pivot = ary[ary.length -1];
 	int x = 0;
-	while (x < int[].length -1){
-	    if (int[x] >= pivot){
+	while (x < ary.length -1){
+	    if (ary[x] >= pivot){
 	    }else{
 	    }
 	    x = x + 1;
