@@ -1,26 +1,35 @@
 import java.util.Arrays;
 public class quicksort{
+
     public static int partition (int[] ary, int start, int end){
-	int pivot = ary[end];
-	start = start + 1;
+	int pivot = start + (int)(Math.random()*(end - start + 1));
 	int [] d = new int[ary.length];
-	int z = d.length -1;
-	while (z > end){
+	int z = 0;
+	while (z < ary.length){
+	    if(z < start || z > end){
 	    d[z] = ary[z];
-	    z = z -1;
+	    }
+	    z = z + 1;
 	}
-	while (start < ary.length -1){
-	    if (ary[start] < pivot){
-		d[start] = ary[start];
+	System.out.println(Arrays.toString(ary));
+	System.out.println(Arrays.toString(d));
+	System.out.println ("Pivot = " + pivot);
+	int x = start;
+	while (x <= end){
+	    if (ary[start] < ary[pivot]){
+		d[start] = ary[x];
 		start = start + 1;
-	    }else{
-		d[end] = ary[end];
+	    }else if (ary[start] >ary[pivot]){
+		d[end] = ary[x];
 		end = end - 1;
 	    }
 	    System.out.println(Arrays.toString(d));
+	    x = x + 1;
 	}
+	d[start ] = ary[pivot];
 	return d[pivot];
     }
+
     public static void main (String [] args){
 	int[] a = new int [7];
 	a[0] = 5;
@@ -30,7 +39,6 @@ public class quicksort{
 	a[4] = 9;
 	a[5] = 1;
 	a[6] = 6;
-	partition(a, 0, 6);
-	System.out.println(a);
+	partition(a, 1, 5);
     }
 }
