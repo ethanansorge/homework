@@ -26,7 +26,7 @@ public class QuickSelect{
 	    System.out.println(Arrays.toString(d));
 	    x = x + 1;
 	}
-	d[start ] = ary[pivot];
+	d[start] = ary[pivot];
 	return d[pivot];
     }
 
