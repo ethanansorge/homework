@@ -1,6 +1,7 @@
 import java.util.Arrays;
-public class QuickSelect{
-
+public class Sorts{
+    public static void quicksort{
+    }
     public static int quickSelect(int[] ary, int n){
 	return partition(ary, n, 0, ary.length);	
     }

@@ -11,12 +11,12 @@ public class QuickSelect{
 	int z = 0;
 	while (z < ary.length){
 	    if(z < start || z > end){
-		d[z] = ary[z];
+	    d[z] = ary[z];
 	    }
 	    z = z + 1;
 	}
-	//System.out.println(Arrays.toString(ary));
-	//System.out.println ("Pivot = " + pivot + ", ary[" + pivot + "] = " + ary[pivot]);
+	System.out.println(Arrays.toString(ary));
+	System.out.println ("Pivot = " + pivot + ", ary[" + pivot + "] = " + ary[pivot]);
 	int x = start;
 	int y = end;
 	while (x <= y){
@@ -31,23 +31,22 @@ public class QuickSelect{
 	}
 	d[start] = ary[pivot];
 	System.out.println(Arrays.toString(d));
-	if ( n > 0){
-	    if (start == n){
-		return ary[pivot];
-	    }else{
-		if (start < n){
-		    return partition(ary, n, start, end);
-		}else{
-		    return partition(ary, n, 0, start);
-		}
-	    }
+	if (start == n){
+	    return ary[pivot];
 	}else{
-	    return start;
+	if (start < n){
+	    return partition(ary, n, start, end);
+	}else{
+	    return partition(ary, n, 0, start);
+	}
 	}
     }
 
     public static void main (String [] args){
-	int[] a = new int [7];
+	int[] a = new int [10];
+	int x = 0;
+	while (x < a.length - 1){
+	    
 	a[0] = 5;
 	a[1] = 2;
 	a[2] = 3;
@@ -55,7 +54,7 @@ public class QuickSelect{
 	a[4] = 9;
 	a[5] = 1;
 	a[6] = 6;
-	partition(a, 0, 0, 6);
-	quickSelect (a, 3);
+	//partition(a, 6, 0, 6);
+	//quickSelect (a, 3);
     }
 }
