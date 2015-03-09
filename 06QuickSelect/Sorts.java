@@ -1,6 +1,11 @@
 import java.util.Arrays;
 public class Sorts{
-    public static void quicksort{
+    public static void quicksort(int [] ary){
+	if (start > end){
+	    int temp = ary[start];
+	    ary[start] = ary[end];
+	    ary[end] = ary[temp];
+	}
     }
     public static int quickSelect(int[] ary, int n){
 	return partition(ary, n, 0, ary.length);	
