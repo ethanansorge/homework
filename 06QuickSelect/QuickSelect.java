@@ -1,7 +1,11 @@
 import java.util.Arrays;
 public class QuickSelect{
 
-    public static void partition (int[] ary, int start, int end){
+    public static int quickSelect(int[] ary, int n){
+	return partition(ary, n, 0, ary.length);	
+    }
+
+    public static int partition (int[] ary, int n, int start, int end){
 	int pivot = start + (int)(Math.random()*(end - start + 1));
 	int [] d = new int[ary.length]; 
 	int z = 0;
@@ -27,6 +31,15 @@ public class QuickSelect{
 	}
 	d[start] = ary[pivot];
 	System.out.println(Arrays.toString(d));
+	if (start == n){
+	    return ary[pivot];
+	}else{
+	if (start < n){
+	    return partition(ary, n, start, end);
+	}else{
+	    return partition(ary, n, 0, start);
+	}
+	}
     }
 
     public static void main (String [] args){
@@ -38,6 +51,7 @@ public class QuickSelect{
 	a[4] = 9;
 	a[5] = 1;
 	a[6] = 6;
-	partition(a, 0, 6);
+	//partition(a, 6, 0, 6);
+	//quickSelect (a, 3);
     }
 }
