@@ -38,5 +38,4 @@ public MyLinkedList{
 	c.add(5);
 	c.add(2);
 	c.add(3);
-	System.out.println(c);
-}
+	System.out.println(c);}
