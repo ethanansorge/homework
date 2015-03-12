@@ -23,9 +23,20 @@ public MyLinkedList{
     }
 
     public String toString(){
-	return "";
+	String ans = "[ ";
+	LNode temp = head;
+	while (temp != null){
+	    ans = ans + temp.getData() + ",";
+	    temp = temp.getNext();
+	return ans + " ]";
     }
     
     public int indexOf(int value){
     }
+    public static void main (String[]args){
+	MyLinkedList c = new MyLinkedList();
+	c.add(5);
+	c.add(2);
+	c.add(3);
+	System.out.println(c);
 }
