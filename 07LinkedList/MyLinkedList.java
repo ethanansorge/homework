@@ -1,9 +1,22 @@
 public MyLinkedList{
-    
-    LNode firstNode;
+  
+    LNode firstNode, lastNode;
+    int size;
+
+    public class MyLinkedList{
+	size = 0;
+	firstNode = null;
+	lastNode = null;
+    }
     
     public int get(int index){
-	return nodeArray;
+	int x = 0;
+	LNode returned = first;
+	while (x < index){
+	    returned = returned.getNextNode(); 
+	    x = x + 1;
+	}
+	return returned;
     }
 
     public void set(int index, int  value){
@@ -11,15 +24,19 @@ public MyLinkedList{
     }
 
     public void add(int value){
+	size = size + 1;
     }
     
     public void add(int index, int value){
+	size = size + 1;
     }
 
     public int remove(int index){
+	size = size - 1;
     }
 
     public int size(){
+	return size;
     }
 
     public String toString(){
