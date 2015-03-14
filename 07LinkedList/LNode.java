@@ -27,6 +27,6 @@ public class LNode{
     }
 
     public String toString(){
-	return "Data = " + getData() + " Next Node = " getNextNode();
+	return "Data = " + getData() + " Next Node = " + getNextNode();
     }
 }
