@@ -40,7 +40,7 @@ public class MyLinkedList{
 	    lastNode = a;
 	}else{
 	LNode oneBefore = get(index - 1);
-	LNode current = get(index);
+	LNode current = oneBefore.getNextNode();
 	oneBefore.setNextNode(a);
 	a.setNextNode(current);
 	}
@@ -49,8 +49,8 @@ public class MyLinkedList{
 
     public int remove(int index){
 	LNode oneBefore = get(index - 1);
-	LNode oneAfter = get(index + 1);
-	LNode current = get(index);
+	LNode current = oneBefore.getNextNode();
+	LNode oneAfter = current.getNextNode();
 	int a = current.getData();
 	oneBefore.setNextNode(oneAfter);
 	size = size - 1;
@@ -64,7 +64,7 @@ public class MyLinkedList{
     public String toString(){
 	String ans = "[ ";
 	LNode temp = firstNode;
-	while (temp != null){
+	while (!temp.equals(lastNode)){
 	    ans = ans + temp.getData() + ",";
 	    temp = temp.getNextNode();
 	}
@@ -83,12 +83,19 @@ public class MyLinkedList{
 	}
 	return i;
     }
+    
+    public String name(){
+	return "Ansorge, Ethan";
+    }
 
     public static void main (String[]args){
 	MyLinkedList c = new MyLinkedList();
 	c.add(5);
 	c.add(2);
 	c.add(3);
+	c.add(7);
+	c.add(1,8);
+	System.out.println(c.size());
 	System.out.println(c);
     }
 }
