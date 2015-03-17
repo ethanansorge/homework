@@ -102,7 +102,7 @@ public class MyLinkedList<T>{
     }
 
     public String name(){
-	return "Ansorge, Ethan";
+	return "Ansorge.Ethan";
     }
 
     public static void main (String[]args){
