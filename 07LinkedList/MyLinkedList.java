@@ -1,5 +1,6 @@
-public class MyLinkedList{
-    LNode firstNode, lastNode;
+public class MyLinkedList<T>{
+    LNode<T> firstNode;
+    LNode<T> lastNode;
     int size;
 
     public MyLinkedList(){
@@ -8,23 +9,30 @@ public class MyLinkedList{
 	lastNode = null;
     }
     
-    public void set(int index, int  value){
+    public void set(int index, T value){
+	if(index < 0 || index >= size){
+	    throw new IndexOutOfBoundsException();
+	}
 	LNode a = get(index);	
 	a.setData(value);
     }
 
-    public void add(int value){
+    public void add(T value){
 	LNode a = new LNode(value);
 	if (size == 0){
+	    firstNode = a;
 	    lastNode = a;
 	}else{
-        lastNode.setNextNode(a);
-	lastNode = a;
+	    lastNode.setNextNode(a);
+	    lastNode = a;
 	}
 	size = size + 1;
     }
 
     public LNode get(int index){
+	if(index < 0 || index >= size){
+	    throw new IndexOutOfBoundsException();
+	}
 	int i = 0;
 	LNode temp = firstNode;
 	while (i < index){
@@ -34,27 +42,36 @@ public class MyLinkedList{
 	return temp;
     }
     
-    public void add(int index, int value){
+    public void add(int index, T value){
+	if(index < 0 || index >= size){
+	    throw new IndexOutOfBoundsException();
+	}
 	LNode a = new LNode(value);
 	if (size == 0){
 	    lastNode = a;
 	}else{
-	LNode oneBefore = get(index - 1);
-	LNode current = oneBefore.getNextNode();
-	oneBefore.setNextNode(a);
-	a.setNextNode(current);
+	    LNode oneBefore = get(index - 1);
+	    LNode current = oneBefore.getNextNode();
+	    oneBefore.setNextNode(a);
+	    a.setNextNode(current);
 	}
 	size = size + 1;
     }
 
-    public int remove(int index){
+    public void remove(int index){
+	if(index < 0 || index >= size){
+	    throw new IndexOutOfBoundsException();
+	}
 	LNode oneBefore = get(index - 1);
 	LNode current = oneBefore.getNextNode();
 	LNode oneAfter = current.getNextNode();
-	int a = current.getData();
-	oneBefore.setNextNode(oneAfter);
+	try{
+	    oneBefore.setNextNode(oneAfter);
+	}catch(NullPointerException e){
+	    current.setNextNode(null);
+	    lastNode = current;
+	}
 	size = size - 1;
-	return a;
     }
 
     public int size(){
@@ -64,14 +81,14 @@ public class MyLinkedList{
     public String toString(){
 	String ans = "[ ";
 	LNode temp = firstNode;
-	while (!temp.equals(lastNode)){
+	while (temp != null){
 	    ans = ans + temp.getData() + ",";
 	    temp = temp.getNextNode();
 	}
 	return ans + " ]";
     }
-    
-    public int indexOf(int value){
+
+    public int indexOf(T value){
 	int i = 0;
 	LNode a = firstNode;
 	while (a.getNextNode() != null){
@@ -83,19 +100,11 @@ public class MyLinkedList{
 	}
 	return i;
     }
-    
+
     public String name(){
 	return "Ansorge, Ethan";
     }
 
     public static void main (String[]args){
-	MyLinkedList c = new MyLinkedList();
-	c.add(5);
-	c.add(2);
-	c.add(3);
-	c.add(7);
-	c.add(1,8);
-	System.out.println(c.size());
-	System.out.println(c);
     }
 }
