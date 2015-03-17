@@ -13,12 +13,12 @@ public class MyLinkedList<T>{
 	if(index < 0 || index >= size){
 	    throw new IndexOutOfBoundsException();
 	}
-	LNode a = get(index);	
+	LNode<T> a = get(index);	
 	a.setData(value);
     }
 
     public void add(T value){
-	LNode a = new LNode(value);
+	LNode<T> a = new LNode<T> (value);
 	if (size == 0){
 	    firstNode = a;
 	    lastNode = a;
@@ -29,12 +29,12 @@ public class MyLinkedList<T>{
 	size = size + 1;
     }
 
-    public LNode get(int index){
+    public LNode<T> get(int index){
 	if(index < 0 || index >= size){
 	    throw new IndexOutOfBoundsException();
 	}
 	int i = 0;
-	LNode temp = firstNode;
+	LNode<T> temp = firstNode;
 	while (i < index){
 	    temp = temp.getNextNode();
 	    i = i + 1;
@@ -46,12 +46,12 @@ public class MyLinkedList<T>{
 	if(index < 0 || index >= size){
 	    throw new IndexOutOfBoundsException();
 	}
-	LNode a = new LNode(value);
+	LNode<T> a = new LNode<T> (value);
 	if (size == 0){
 	    lastNode = a;
 	}else{
-	    LNode oneBefore = get(index - 1);
-	    LNode current = oneBefore.getNextNode();
+	    LNode<T> oneBefore = get(index - 1);
+	    LNode<T> current = oneBefore.getNextNode();
 	    oneBefore.setNextNode(a);
 	    a.setNextNode(current);
 	}
@@ -62,9 +62,9 @@ public class MyLinkedList<T>{
 	if(index < 0 || index >= size){
 	    throw new IndexOutOfBoundsException();
 	}
-	LNode oneBefore = get(index - 1);
-	LNode current = oneBefore.getNextNode();
-	LNode oneAfter = current.getNextNode();
+	LNode<T> oneBefore = get(index - 1);
+	LNode<T> current = oneBefore.getNextNode();
+	LNode<T> oneAfter = current.getNextNode();
 	try{
 	    oneBefore.setNextNode(oneAfter);
 	}catch(NullPointerException e){
@@ -80,7 +80,7 @@ public class MyLinkedList<T>{
 
     public String toString(){
 	String ans = "[ ";
-	LNode temp = firstNode;
+	LNode<T> temp = firstNode;
 	while (temp != null){
 	    ans = ans + temp.getData() + ",";
 	    temp = temp.getNextNode();
@@ -90,7 +90,7 @@ public class MyLinkedList<T>{
 
     public int indexOf(T value){
 	int i = 0;
-	LNode a = firstNode;
+	LNode<T> a = firstNode;
 	while (a.getNextNode() != null){
 	    if(value == a.getData()){
 		break;
