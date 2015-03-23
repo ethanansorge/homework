@@ -1,3 +1,4 @@
+import java.util.*
 public class MyLinkedList<T>{
     LNode<T> firstNode;
     LNode<T> lastNode;
@@ -103,6 +104,9 @@ public class MyLinkedList<T>{
 
     public String name(){
 	return "Ansorge.Ethan";
+    }
+
+    public class Iterator<T> implements iterable(){
     }
 
     public static void main (String[]args){
