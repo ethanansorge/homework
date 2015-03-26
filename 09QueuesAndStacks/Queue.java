@@ -1,7 +1,11 @@
-public class Queue<T> extends MyLinkedList<T>{
-    public boolean add(T node){
+public class Queue<T>{
+
+    public Queue(){
+	linkedList = new MyLinkedList<T>();
+    }
+    public void add(T node){
+	lastNode.setNextNode(node);
 	lastNode = node;
-	return true;
     }
     public T remove(){
 	Node a = firstNode;
