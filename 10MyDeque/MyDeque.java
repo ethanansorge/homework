@@ -5,9 +5,15 @@ public class MyDeque{
     int size;
 
     public void addLast(T value){
+	if (size < queue.length -1){
+	    queue[tail + 1] = value;
+	    tail = tail + 1;
+	}else{
+	}
     }
 
     public void addFirst(T value){
+	
     }
 
     public T removeFirst(){
