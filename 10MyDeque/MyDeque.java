@@ -11,6 +11,11 @@ public class MyDeque{
     }
 
     public T removeFirst(){
+	T temp = queue[head];
+	queue[head] = null;
+	size = size - 1;
+	head = head + 1;
+	return temp;
     }
 
     public T removeLast(){
@@ -18,6 +23,7 @@ public class MyDeque{
 	queue[tail] = null;
 	size = size - 1;
 	tail = tail - 1;
+	return temp;
     }
 
     public T getFirst(){
