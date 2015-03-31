@@ -83,4 +83,8 @@ public class Maze{
 	}
 	return hide + go(0,0) + ans + "\n" + show + color(37,40);
     }
+    public boolean solve(){
+    }
+    public boolean solve(int x, int y){
+    }
 }
