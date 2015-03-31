@@ -67,8 +67,10 @@ public class Maze{
 	catch (InterruptedException e) {
 	}
     }
-
     public String toString(){
+	return toString(false);
+    }
+    public String toString(boolean animate){
 	String ans = "Solving a maze that is " + maxx + " by " + maxy + "\n";
 	for(int i = 0; i < maxx * maxy; i++){
 	    if(i % maxx == 0 && i != 0){
