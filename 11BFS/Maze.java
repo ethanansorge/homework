@@ -1,13 +1,14 @@
 public class Maze{
-    int x, y;
+    public int x,y;
     public char[][] maze;
     private int maxx,maxy;
     private int startx,starty;
-    //Terminal keycodes to clear the terminal, or hide/show the cursor
     private String clear =  "\033[2J";
     private String hide =  "\033[?25l";
     private String show =  "\033[?25h";
-
+    private String go(int x,int y){
+	return ("\033[" + x + ";" + y + "H");
+    }
     public Mazesolver(String filename){
 	startx = -1;
 	starty = -1;
@@ -44,13 +45,7 @@ public class Maze{
 		starty = i / maxx;
 	    }
 	}
-    }
-
-    //terminal specific character to move the cursor
-    private String go(int x,int y){
-	return ("\033[" + x + ";" + y + "H");
-    }
-	    
+    }	    
 
     private String color(int foreground,int background){
 	return ("\033[0;" + foreground + ";" + background + "m");
@@ -94,9 +89,13 @@ public class Maze{
     public boolean solveDFS(boolean animate){    }
 
     public boolean solveBFS(){
- return solveBFS(false);
+	return solveBFS(false);
     }
     public boolean solveDFS(){
- return solveDFS(false);
+	return solveDFS(false);
+    }
+    public int[] solutionCoordinates(){
     }
 }
+
+// BFS keeps adding possible moves to a queue, it takes each one and adds the next possible moves to the end//
