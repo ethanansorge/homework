@@ -95,18 +95,22 @@ public class Maze{
 	    toString(true);
 	}
 
-    public boolean solveBFS(){
-	return solveBFS(false);
-    }
-    public boolean solveDFS(){
-	return solveDFS(false);
-    }
-    public int[] solutionCoordinates(){
-    }
-    public static void main (String [] args){
-	Maze a = new Maze("data1.dat");
-	a.solveDFS(true);
-	System.out.println(a);
-}
+	public boolean solveBFS(){
+	    return solveBFS(false);
+	}
+	public boolean solveDFS(){
+	    return solveDFS(false);
+	}
+	public int[] solutionCoordinates(){
+	}
+	public String name(){
+	    return "Ansorge.Ethan";
+	}
+	public static void main (String [] args){
+	    Maze a = new Maze("data1.dat");
+	    a.solveDFS(true);
+	    System.out.println(a);
+	}
+	
 
-// BFS keeps adding possible moves to a queue, it takes each one and adds the next possible moves to the end//
+	// BFS keeps adding possible moves to a queue, it takes each one and adds the next possible moves to the end//
