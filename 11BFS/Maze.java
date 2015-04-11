@@ -95,13 +95,27 @@ public class Maze{
 		return true;
 	    }
 	    maze[current.x][current.y] = '@';
-	    addIfValid(deque, current.x + 1, current.y, false);
-	    addIfValid(deque, current.x - 1, current.y, false);
-	    addIfValid(deque, current.x, current.y + 1, false);
-	    addIfValid(deque, current.x, current.y - 1, false);
+	    addNeighbors(deque, false, current);
 	    maze[current.x][current.y] = '.';
 	   
 	}
+	return false;
+    }
+    public boolean solveDFS(boolean animate){
+	ArrayDeque<Coordinate> deque = new ArrayDeque<Coordinate>();
+	deque.addLast(new Coordinate(startx, starty));
+	while(!deque.isEmpty()){
+	    System.out.println(this);
+	    wait(20);
+	    Coordinate current = deque.removeFirst();
+	    if (maze[current.x][current.y] == 'E'){
+		return true;
+	    }
+	    maze[current.x][current.y] = '@';
+	    addNeighbors(deque, true, current);
+	    maze[current.x][current.y] = '.';
+	   
+	}   
 	return false;
     }
 
@@ -117,27 +131,13 @@ public class Maze{
 	}
     }
     
-    
-    public boolean solveDFS(boolean animate){
-	ArrayDeque<Coordinate> deque = new ArrayDeque<Coordinate>();
-	deque.addLast(new Coordinate(startx, starty));
-	while(!deque.isEmpty()){
-	    System.out.println(this);
-	    wait(20);
-	    Coordinate current = deque.removeFirst();
-	    if (maze[current.x][current.y] == 'E'){
-		return true;
-	    }
-	    maze[current.x][current.y] = '@';
-	    addIfValid(deque, current.x + 1, current.y, true);
-	    addIfValid(deque, current.x - 1, current.y, true);
-	    addIfValid(deque, current.x, current.y + 1, true);
-	    addIfValid(deque, current.x, current.y - 1, true);
-	    maze[current.x][current.y] = '.';
-	   
-	}   
-	return false;
+    private void addNeighbors(ArrayDeque<Coordinate> deque, boolean stack, Coordinate current){
+	addIfValid(deque, current.x + 1, current.y, stack);
+	addIfValid(deque, current.x - 1, current.y, stack);
+	addIfValid(deque, current.x, current.y + 1, stack);
+	addIfValid(deque, current.x, current.y - 1, stack);
     }
+   
 
     public boolean solveBFS(){
 	return solveBFS(false);
@@ -146,16 +146,16 @@ public class Maze{
 	return solveDFS(false);
     }
     /*public int[] solutionCoordinates(){
-    }
+      }
     */
     public String name(){
 	return "ansorge.ethan";
     }
     public static void main (String [] args){
 	Maze a = new Maze("data1.dat");
-	a.solveDFS(true);
+	a.solveBFS(true);
 	System.out.println(a);
     }
 }
 
-    // BFS keeps adding possible moves to a queue, it takes each one and adds the next possible moves to the end//
+// BFS keeps adding possible moves to a queue, it takes each one and adds the next possible moves to the end//
