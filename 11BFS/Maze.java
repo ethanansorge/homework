@@ -90,7 +90,7 @@ public class Maze{
     public boolean solveDFS(boolean animate){
 	return solve(animate, true);
     }
-    private boolean solve(boolean animate, boolean stack){
+    public boolean solve(boolean animate, boolean stack){
 	ArrayDeque<Coordinate> deque = new ArrayDeque<Coordinate>();
 	deque.addLast(new Coordinate(startx, starty));
 	while(!deque.isEmpty()){
@@ -102,8 +102,10 @@ public class Maze{
 	    maze[current.x][current.y] = '@';
 	    addNeighbors(deque, stack, current);
 	    maze[current.x][current.y] = '.';
-	    System.out.println(this);
-	    wait(20);
+	    if(animate){
+		System.out.println(this);
+		wait(100);
+	    }
 	}
 	return false;
     }
@@ -142,9 +144,8 @@ public class Maze{
     }
     public static void main (String [] args){
 	Maze a = new Maze("data1.dat");
-	a.solveBFS(true);
-	System.out.println(a);
+	 a.solveBFS(false);
+	 //System.out.println(a);
     }
 }
 
-// BFS keeps adding possible moves to a queue, it takes each one and adds the next possible moves to the end//
