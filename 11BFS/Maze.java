@@ -80,13 +80,20 @@ public class Maze{
 	}
 	return hide + go(0,0) + ans + "\n" + show + color(37,40);
     }
-    public boolean solveBFS(boolean animate){    }
-
+    public boolean solveBFS(boolean animate){    
+	if (animate = true){
+	    toString(true);
+	}
+    }
+  
     /**Solve the maze using a frontier in a DFS manner. 
      * When animate is true, print the board at each step of the algorithm.
      * Replace spaces with x's as you traverse the maze. 
      */
-    public boolean solveDFS(boolean animate){    }
+    public boolean solveDFS(boolean animate){    
+    	if (animate = true){
+	    toString(true);
+	}
 
     public boolean solveBFS(){
 	return solveBFS(false);
@@ -96,6 +103,10 @@ public class Maze{
     }
     public int[] solutionCoordinates(){
     }
+    public static void main (String [] args){
+	Maze a = new Maze("data1.dat");
+	a.solveDFS(true);
+	System.out.println(a);
 }
 
 // BFS keeps adding possible moves to a queue, it takes each one and adds the next possible moves to the end//
