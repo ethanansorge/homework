@@ -9,7 +9,7 @@ public class Maze implements Deque<E>{
     private String go(int x,int y){
 	return ("\033[" + x + ";" + y + "H");
     }
-    public Mazesolver(String filename){
+    public Maze(String filename){
 	startx = -1;
 	starty = -1;
 	//read the whole maze into a single string first
