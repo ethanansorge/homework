@@ -85,10 +85,10 @@ public class Maze{
     }
 
     public boolean solveBFS(boolean animate){  
-	return solve(animate, true);
+	return solve(animate, false);
     }
     public boolean solveDFS(boolean animate){
-	return solve(animate, false);
+	return solve(animate, true);
     }
     private boolean solve(boolean animate, boolean stack){
 	ArrayDeque<Coordinate> deque = new ArrayDeque<Coordinate>();
