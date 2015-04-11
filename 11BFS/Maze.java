@@ -118,6 +118,9 @@ public class Maze{
 	}   
 	return false;
     }
+    private boolean solve(){
+	return true;
+    }
 
     private void addIfValid(ArrayDeque<Coordinate> deque, int x, int y, boolean stack){
 	if (0 <= x && x < maze.length && 0 <= y && y < maze[0].length){
