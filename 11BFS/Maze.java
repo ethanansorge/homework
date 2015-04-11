@@ -81,19 +81,10 @@ public class Maze implements Deque<E>{
 	return hide + go(0,0) + ans + "\n" + show + color(37,40);
     }
     public boolean solveBFS(boolean animate){    
-	if (animate = true){
-	    toString(true);
-	}
     }
-  
-    /**Solve the maze using a frontier in a DFS manner. 
-     * When animate is true, print the board at each step of the algorithm.
-     * Replace spaces with x's as you traverse the maze. 
-     */
+    
     public boolean solveDFS(boolean animate){    
-    	if (animate = true){
-	    toString(true);
-	}
+    }
 
 	public boolean solveBFS(){
 	    return solveBFS(false);
