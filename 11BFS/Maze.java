@@ -95,25 +95,47 @@ public class Maze{
 		return true;
 	    }
 	    maze[current.x][current.y] = '@';
-	    addIfValid(deque, current.x + 1, current.y);
-	    addIfValid(deque, current.x - 1, current.y);
-	    addIfValid(deque, current.x, current.y + 1);
-	    addIfValid(deque, current.x, current.y - 1);
+	    addIfValid(deque, current.x + 1, current.y, false);
+	    addIfValid(deque, current.x - 1, current.y, false);
+	    addIfValid(deque, current.x, current.y + 1, false);
+	    addIfValid(deque, current.x, current.y - 1, false);
 	    maze[current.x][current.y] = '.';
 	   
 	}
 	return false;
     }
 
-    private void addIfValid(ArrayDeque<Coordinate> deque, int x, int y){
+    private void addIfValid(ArrayDeque<Coordinate> deque, int x, int y, boolean stack){
 	if (0 <= x && x < maze.length && 0 <= y && y < maze[0].length){
 	    if (maze[x][y] == ' '){
-		deque.addLast(new Coordinate(x, y));
+		if (stack){
+		    deque.addFirst(new Coordinate(x, y));
+		}else{
+		    deque.addLast(new Coordinate(x, y));
+		}
 	    }
 	}
     }
     
-    public boolean solveDFS(boolean animate){    
+    
+    public boolean solveDFS(boolean animate){
+	ArrayDeque<Coordinate> deque = new ArrayDeque<Coordinate>();
+	deque.addLast(new Coordinate(startx, starty));
+	while(!deque.isEmpty()){
+	    System.out.println(this);
+	    wait(20);
+	    Coordinate current = deque.removeFirst();
+	    if (maze[current.x][current.y] == 'E'){
+		return true;
+	    }
+	    maze[current.x][current.y] = '@';
+	    addIfValid(deque, current.x + 1, current.y, true);
+	    addIfValid(deque, current.x - 1, current.y, true);
+	    addIfValid(deque, current.x, current.y + 1, true);
+	    addIfValid(deque, current.x, current.y - 1, true);
+	    maze[current.x][current.y] = '.';
+	   
+	}   
 	return false;
     }
 
@@ -131,7 +153,7 @@ public class Maze{
     }
     public static void main (String [] args){
 	Maze a = new Maze("data1.dat");
-	a.solveBFS(true);
+	a.solveDFS(true);
 	System.out.println(a);
     }
 }
