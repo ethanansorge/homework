@@ -1,4 +1,4 @@
-public class Maze{
+public class Maze implements Deque<E>{
     public int x,y;
     public char[][] maze;
     private int maxx,maxy;
