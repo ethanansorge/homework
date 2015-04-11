@@ -1,14 +1,17 @@
-public class Maze implements Deque<E>{
-    public int x,y;
-    public char[][] maze;
+import java.util.*;
+import java.io.*;
+public class Maze{
+    private char[][] maze;
     private int maxx,maxy;
     private int startx,starty;
     private String clear =  "\033[2J";
     private String hide =  "\033[?25l";
     private String show =  "\033[?25h";
+    
     private String go(int x,int y){
 	return ("\033[" + x + ";" + y + "H");
     }
+
     public Maze(String filename){
 	startx = -1;
 	starty = -1;
@@ -95,7 +98,7 @@ public class Maze implements Deque<E>{
 	public int[] solutionCoordinates(){
 	}
 	public String name(){
-	    return "Ansorge.Ethan";
+	    return "ansorge.ethan";
 	}
 	public static void main (String [] args){
 	    Maze a = new Maze("data1.dat");
