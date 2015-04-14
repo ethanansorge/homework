@@ -7,7 +7,7 @@ public class Maze{
     private String clear =  "\033[2J";
     private String hide =  "\033[?25l";
     private String show =  "\033[?25h";
-    
+    private int[] solutionCoordinates;
     private String go(int x,int y){
 	return ("\033[" + x + ";" + y + "H");
     }
@@ -97,6 +97,7 @@ public class Maze{
 	    Coordinate current = deque.removeFirst();
 	    
 	    if (maze[current.x][current.y] == 'E'){
+		addCoordinatesToSolutionArray(current);
 		return true;
 	    }
 	    maze[current.x][current.y] = '@';
@@ -110,23 +111,24 @@ public class Maze{
 	return false;
     }
 
-    private void addIfValid(ArrayDeque<Coordinate> deque, int x, int y, boolean stack){
+    private void addIfValid(ArrayDeque<Coordinate> deque, int x, int y, boolean stack, Coordinate previous){
 	if (0 <= x && x < maze.length && 0 <= y && y < maze[0].length){
 	    if (maze[x][y] == ' '){
+		Coordinate next = new Coordinate(x, y, previous);
 		if (stack){
-		    deque.addFirst(new Coordinate(x, y));
+		    deque.addFirst(next);
 		}else{
-		    deque.addLast(new Coordinate(x, y));
+		    deque.addLast(next);
 		}
 	    }
 	}
     }
     
     private void addNeighbors(ArrayDeque<Coordinate> deque, boolean stack, Coordinate current){
-	addIfValid(deque, current.x + 1, current.y, stack);
-	addIfValid(deque, current.x - 1, current.y, stack);
-	addIfValid(deque, current.x, current.y + 1, stack);
-	addIfValid(deque, current.x, current.y - 1, stack);
+	addIfValid(deque, current.x + 1, current.y, stack, current);
+	addIfValid(deque, current.x - 1, current.y, stack, current);
+	addIfValid(deque, current.x, current.y + 1, stack, current);
+	addIfValid(deque, current.x, current.y - 1, stack, current);
     }
    
 
@@ -139,6 +141,11 @@ public class Maze{
     /*public int[] solutionCoordinates(){
       }
     */
+    public void addCoordinatesToSolutionArray(Coordinate current){
+	solutionCoordinates[x] = current.x;
+	solutionCoordinates[y] = current.y;
+    }
+
     public String name(){
 	return "ansorge.ethan";
     }
