@@ -7,7 +7,8 @@ public class Maze{
     private String clear =  "\033[2J";
     private String hide =  "\033[?25l";
     private String show =  "\033[?25h";
-    private int[] solutionCoordinates;
+    private Coordinate[] solutionCoordinates;
+    private int solutionCoordsLength = 0;
     private String go(int x,int y){
 	return ("\033[" + x + ";" + y + "H");
     }
@@ -48,6 +49,8 @@ public class Maze{
 		starty = i / maxx;
 	    }
 	}
+	solutionCoordinates = new Coordinate[maxx * maxy];
+	
     }	    
 
     private String color(int foreground,int background){
@@ -92,12 +95,14 @@ public class Maze{
     }
     public boolean solve(boolean animate, boolean stack){
 	ArrayDeque<Coordinate> deque = new ArrayDeque<Coordinate>();
-	deque.addLast(new Coordinate(startx, starty));
+	Coordinate first = new Coordinate(startx, starty, null);
+	deque.addLast(first);
+	addCoordinateToSolutionArray(first);
 	while(!deque.isEmpty()){
 	    Coordinate current = deque.removeFirst();
-	    
 	    if (maze[current.x][current.y] == 'E'){
-		addCoordinatesToSolutionArray(current);
+		addCoordinateToSolutionArray(current);
+		addCoordinateToSolutionArray(current.previous);
 		return true;
 	    }
 	    maze[current.x][current.y] = '@';
@@ -105,7 +110,7 @@ public class Maze{
 	    maze[current.x][current.y] = '.';
 	    if(animate){
 		System.out.println(this);
-		wait(100);
+		wait(20);
 	    }
 	}
 	return false;
@@ -113,7 +118,7 @@ public class Maze{
 
     private void addIfValid(ArrayDeque<Coordinate> deque, int x, int y, boolean stack, Coordinate previous){
 	if (0 <= x && x < maze.length && 0 <= y && y < maze[0].length){
-	    if (maze[x][y] == ' '){
+	    if (maze[x][y] == ' ' || maze[x][y] == 'E'){
 		Coordinate next = new Coordinate(x, y, previous);
 		if (stack){
 		    deque.addFirst(next);
@@ -141,18 +146,23 @@ public class Maze{
     /*public int[] solutionCoordinates(){
       }
     */
-    public void addCoordinatesToSolutionArray(Coordinate current){
-	solutionCoordinates[x] = current.x;
-	solutionCoordinates[y] = current.y;
+    public void addCoordinateToSolutionArray(Coordinate current){
+	solutionCoordinates[solutionCoordsLength] = current;
+	solutionCoordsLength = solutionCoordsLength + 1;
     }
 
     public String name(){
 	return "ansorge.ethan";
     }
+
     public static void main (String [] args){
 	Maze a = new Maze("data1.dat");
-	 a.solveBFS(false);
-	 //System.out.println(a);
+	 a.solveBFS(true);
+	 int i = 0;
+	 while (i < a.solutionCoordinates.length && a.solutionCoordinates[i] != null){
+	     System.out.println((a.solutionCoordinates[i]).x + ", " + (a.solutionCoordinates[i]).y);
+	     i = i + 1;
+	 }
     }
 }
 
