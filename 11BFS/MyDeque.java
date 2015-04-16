@@ -1,59 +1,40 @@
-public class MyDeque{
-    Object[] queue;
-    int head;
-    int tail;
-    int size;
+import java.util.*;
 
-    public void addLast(T value){
-	if (size < queue.length -1){
-	    queue[tail + 1] = value;
-	    tail = tail + 1;
-	}else{
+public class MyDeque <T extends Comparable<T>>{
+    ArrayList<T> elements = new ArrayList<T>();
+
+    public void add (T value){
+	int i = elements.size();
+	elements.add(null);
+	while( i > 0 && elements.get(i - 1).compareTo(value) < 0){
+	    elements.set(i, elements.get(i - 1));
+	    i = i - 1;
 	}
+	elements.set(i, value);
+    }
+	// Loop through elements starting at back
+	   // Continue if the element you are adding is greater than the one before
+	   // Shift elements over
+        // Add element to apporpriate spot 
+    public String toString(){
+	return elements.toString();
     }
 
-    public void addFirst(T value){
-	
+    public T remove(){
+	return elements.remove(elements.size() - 1);
+    }
+    
+    public boolean isEmpty(){
+	return elements.isEmpty();
     }
 
-    public T removeFirst(){
-	T temp = queue[head];
-	queue[head] = null;
-	size = size - 1;
-	head = head + 1;
-	return temp;
-    }
-
-    public T removeLast(){
-	T temp = queue[tail];
-	queue[tail] = null;
-	size = size - 1;
-	tail = tail - 1;
-	return temp;
-    }
-
-    public T getFirst(){
-	return (T) queue[head];
-    }
-
-    public T getLast(){
-	return (T) queue[tail];
-    }
-
-    public void resize(){
-	Object[] newQueue = new Object[size * 2];
+    public static void main(String [] args){
+	MyDeque<Integer> test = new MyDeque<Integer>();
 	int i = 0;
-	int x = 0;
-	while (i < size - 1){
-	    if (x > size){
-		x = 0;
-	    }
-	    newQueue[i] = queue[x];
+	while (i < 10){
+	    test.add((int) (Math.random() * 100 ));
 	    i = i + 1;
-	    x = x + 1;
 	}
-	queue = newQueue;
-	head = 0;
-	tail = i - 1;
+	System.out.println(test.toString());
     }
 }

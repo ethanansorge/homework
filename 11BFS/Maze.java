@@ -48,6 +48,10 @@ public class Maze{
 		startx = i % maxx;
 		starty = i / maxx;
 	    }
+	    if (c == 'E'){
+	       	Coordinate.endX = i % maxx;
+		Coordinate.endX = i / maxx;
+	    }
 	}
 	solutionCoordinates = new Coordinate[maxx * maxy];
 	
@@ -87,19 +91,14 @@ public class Maze{
 	return hide + go(0,0) + ans + "\n" + show + color(37,40);
     }
 
-    public boolean solveBFS(boolean animate){  
-	return solve(animate, false);
-    }
-    public boolean solveDFS(boolean animate){
-	return solve(animate, true);
-    }
+   
     public boolean solve(boolean animate, boolean stack){
-	ArrayDeque<Coordinate> deque = new ArrayDeque<Coordinate>();
+	MyDeque<Coordinate> deque = new MyDeque<Coordinate>();
 	Coordinate head = new Coordinate(0,0,null);
 	Coordinate first = new Coordinate(startx, starty, head);
-	deque.addLast(first);
+	deque.add(first);
 	while(!deque.isEmpty()){
-	    Coordinate current = deque.removeFirst();
+	    Coordinate current = deque.remove();
 	    if (maze[current.x][current.y] == 'E'){
 		while(current.previous != null){
 		    addCoordinateToSolutionArray(current);
@@ -118,20 +117,16 @@ public class Maze{
 	return false;
     }
 
-    private void addIfValid(ArrayDeque<Coordinate> deque, int x, int y, boolean stack, Coordinate previous){
+    private void addIfValid(MyDeque<Coordinate> deque, int x, int y, boolean stack, Coordinate previous){
 	if (0 <= x && x < maze.length && 0 <= y && y < maze[0].length){
 	    if (maze[x][y] == ' ' || maze[x][y] == 'E'){
 		Coordinate next = new Coordinate(x, y, previous);
-		if (stack){
-		    deque.addFirst(next);
-		}else{
-		    deque.addLast(next);
-		}
+		deque.add(next);
 	    }
 	}
     }
     
-    private void addNeighbors(ArrayDeque<Coordinate> deque, boolean stack, Coordinate current){
+    private void addNeighbors(MyDeque<Coordinate> deque, boolean stack, Coordinate current){
 	addIfValid(deque, current.x + 1, current.y, stack, current);
 	addIfValid(deque, current.x - 1, current.y, stack, current);
 	addIfValid(deque, current.x, current.y + 1, stack, current);
@@ -139,12 +134,20 @@ public class Maze{
     }
    
 
-    public boolean solveBFS(){
+    /* public boolean solveBFS(){
 	return solveBFS(false);
     }
     public boolean solveDFS(){
-	return solveDFS(false);
+    return solveDFS(false);
     }
+    public boolean solveBFS(boolean animate){  
+    return solve(animate, false);
+    }
+    public boolean solveDFS(boolean animate){
+    return solve(animate, true);
+    }
+
+    */
     public int[] solutionCoordinates(){
 	int[] numberCoords = new int[solutionCoordsLength * 2];
 	int i = 0;
@@ -175,26 +178,26 @@ public class Maze{
 
     public static void main (String [] args){
 	Maze a = new Maze("data1.dat");
-	 a.solveDFS(true);
-	 a.printCoords();
-	  /*
-	 int i = a.solutionCoordsLength - 1;
-	 while (i > 1 && a.solutionCoordinates[i] != null){
-	     System.out.print("(" + (a.solutionCoordinates[i]).x + ", " + (a.solutionCoordinates[i]).y + ")" );
-	     i = i - 1;
-	 }
+	a.solve(true, false);
+	a.printCoords();
+	/*
+	  int i = a.solutionCoordsLength - 1;
+	  while (i > 1 && a.solutionCoordinates[i] != null){
+	  System.out.print("(" + (a.solutionCoordinates[i]).x + ", " + (a.solutionCoordinates[i]).y + ")" );
+	  i = i - 1;
+	  }
 	
-	 int[] xycoords = a.solutionCoordinates();
-	 int x = 0;
-	 while (x < xycoords.length){
-	     if (x % 2 == 0){
-		 System.out.print("(" + xycoords[x] + ",");
-	     }else{
-		 System.out.print(" " + xycoords[x]);
-	     }
-	     x = x + 1;
-	 }
-	 */
+	  int[] xycoords = a.solutionCoordinates();
+	  int x = 0;
+	  while (x < xycoords.length){
+	  if (x % 2 == 0){
+	  System.out.print("(" + xycoords[x] + ",");
+	  }else{
+	  System.out.print(" " + xycoords[x]);
+	  }
+	  x = x + 1;
+	  }
+	*/
     }
 }
 
