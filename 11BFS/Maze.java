@@ -165,15 +165,25 @@ public class Maze{
 	return "ansorge.ethan";
     }
 
+    public void printCoords(){
+	int i = solutionCoordsLength - 1;
+	while (i > 1 && solutionCoordinates[i] != null){
+	    System.out.print("(" + (solutionCoordinates[i]).x + ", " + (solutionCoordinates[i]).y + ")" );
+	    i = i - 1;
+	}
+    }
+
     public static void main (String [] args){
 	Maze a = new Maze("data1.dat");
 	 a.solveDFS(true);
+	 a.printCoords();
+	  /*
 	 int i = a.solutionCoordsLength - 1;
 	 while (i > 1 && a.solutionCoordinates[i] != null){
 	     System.out.print("(" + (a.solutionCoordinates[i]).x + ", " + (a.solutionCoordinates[i]).y + ")" );
 	     i = i - 1;
 	 }
-	 /*
+	
 	 int[] xycoords = a.solutionCoordinates();
 	 int x = 0;
 	 while (x < xycoords.length){
