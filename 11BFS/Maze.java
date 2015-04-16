@@ -95,14 +95,16 @@ public class Maze{
     }
     public boolean solve(boolean animate, boolean stack){
 	ArrayDeque<Coordinate> deque = new ArrayDeque<Coordinate>();
-	Coordinate first = new Coordinate(startx, starty, null);
+	Coordinate head = new Coordinate(0,0,null);
+	Coordinate first = new Coordinate(startx, starty, head);
 	deque.addLast(first);
-	addCoordinateToSolutionArray(first);
 	while(!deque.isEmpty()){
 	    Coordinate current = deque.removeFirst();
 	    if (maze[current.x][current.y] == 'E'){
-		addCoordinateToSolutionArray(current);
-		addCoordinateToSolutionArray(current.previous);
+		while(current.previous != null){
+		    addCoordinateToSolutionArray(current);
+		    current = current.previous;
+		}
 		return true;
 	    }
 	    maze[current.x][current.y] = '@';
@@ -143,9 +145,17 @@ public class Maze{
     public boolean solveDFS(){
 	return solveDFS(false);
     }
-    /*public int[] solutionCoordinates(){
-      }
-    */
+    public int[] solutionCoordinates(){
+	int[] numberCoords = new int[solutionCoordsLength * 2];
+	int i = 0;
+	while (i < numberCoords.length -2){
+	    numberCoords[i] = (solutionCoordinates[(numberCoords.length - 2) - i]).x;
+	    numberCoords[i + 1] = (solutionCoordinates[(numberCoords.length - 2) - i]).y;
+	    i = i - 2;
+	}
+	return numberCoords;
+    }
+    
     public void addCoordinateToSolutionArray(Coordinate current){
 	solutionCoordinates[solutionCoordsLength] = current;
 	solutionCoordsLength = solutionCoordsLength + 1;
@@ -157,12 +167,24 @@ public class Maze{
 
     public static void main (String [] args){
 	Maze a = new Maze("data1.dat");
-	 a.solveBFS(true);
-	 int i = 0;
-	 while (i < a.solutionCoordinates.length && a.solutionCoordinates[i] != null){
-	     System.out.println((a.solutionCoordinates[i]).x + ", " + (a.solutionCoordinates[i]).y);
-	     i = i + 1;
+	 a.solveDFS(true);
+	 int i = a.solutionCoordsLength - 1;
+	 while (i > 1 && a.solutionCoordinates[i] != null){
+	     System.out.print("(" + (a.solutionCoordinates[i]).x + ", " + (a.solutionCoordinates[i]).y + ")" );
+	     i = i - 1;
 	 }
+	 /*
+	 int[] xycoords = a.solutionCoordinates();
+	 int x = 0;
+	 while (x < xycoords.length){
+	     if (x % 2 == 0){
+		 System.out.print("(" + xycoords[x] + ",");
+	     }else{
+		 System.out.print(" " + xycoords[x]);
+	     }
+	     x = x + 1;
+	 }
+	 */
     }
 }
 
