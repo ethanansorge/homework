@@ -1,5 +1,6 @@
 import java.util.*;
 import java.io.*;
+
 public class Maze{
     private char[][] maze;
     private int maxx,maxy;
@@ -91,63 +92,103 @@ public class Maze{
 	return hide + go(0,0) + ans + "\n" + show + color(37,40);
     }
 
-   
-    public boolean solve(boolean animate, boolean stack){
-	MyDeque<Coordinate> deque = new MyDeque<Coordinate>();
+    public boolean solveBFS(){
+	return solveBFS(false);
+    }
+    public boolean solveDFS(){
+	return solveDFS(false);
+    }
+    public boolean solveBestFirstSearch(){
+	return solveBestFirstSearch(false);
+    }
+    public boolean solveAStart(){
+	return solveDFS(false);
+    }
+    public boolean solveBFS(boolean animate){  
+	return solve(animate, false, false, false);
+    }
+    public boolean solveDFS(boolean animate){
+	return solve(animate, false, true, false);
+    }
+    public boolean solveAStar(boolean animate){
+	return solve(animate, true, false, false);
+    }
+    public boolean solveBestFirstSearch(boolean animate){
+	return solve(animate, true, false, true);
+    }    
+
+    public boolean solve(boolean animate, boolean pQue, boolean stack, boolean best){
 	Coordinate head = new Coordinate(0,0,null);
 	Coordinate first = new Coordinate(startx, starty, head);
-	deque.add(first);
-	while(!deque.isEmpty()){
-	    Coordinate current = deque.remove();
-	    if (maze[current.x][current.y] == 'E'){
-		while(current.previous != null){
-		    addCoordinateToSolutionArray(current);
-		    current = current.previous;
+	boolean done;
+	if (pQue){
+	    PriorityQueue<Coordinate> queue = new PriorityQueue<Coordinate>();
+	    queue.add(first);
+	    while(!queue.isEmpty()){
+		Coordinate current = queue.remove();
+		done = checkAndAdd(true, stack, current, animate, queue, null);
+		if(done){
+		    return true;
 		}
-		return true;
 	    }
-	    maze[current.x][current.y] = '@';
-	    addNeighbors(deque, stack, current);
-	    maze[current.x][current.y] = '.';
-	    if(animate){
-		System.out.println(this);
-		wait(20);
+	}else{
+	    ArrayDeque<Coordinate> deque = new ArrayDeque<Coordinate>();
+	    deque.addLast(first);
+	    while(!deque.isEmpty()){
+		Coordinate current = deque.removeFirst();
+		done = checkAndAdd(false, stack, current, animate, null, deque);
+		if (done){
+		    return true;
+		}
 	    }
 	}
 	return false;
     }
-
-    private void addIfValid(MyDeque<Coordinate> deque, int x, int y, boolean stack, Coordinate previous){
+    
+    private boolean checkAndAdd(boolean pQue, boolean stack, Coordinate current, boolean animate, PriorityQueue<Coordinate> queue, ArrayDeque deque){
+	if (maze[current.x][current.y] == 'E'){
+	    while(current.previous != null){
+		addCoordinateToSolutionArray(current);
+		current = current.previous;
+	    }
+	    return true;
+	}
+	maze[current.x][current.y] = '@';
+	addNeighbors(queue, deque, pQue, stack, current);
+	maze[current.x][current.y] = '.';
+	if(animate){
+	    System.out.println(this);
+	    wait(20);
+	}
+	return false;
+    }
+    private void addIfValid(PriorityQueue<Coordinate> queue, ArrayDeque deque, boolean pQue, boolean stack, int x, int y, Coordinate previous){
 	if (0 <= x && x < maze.length && 0 <= y && y < maze[0].length){
 	    if (maze[x][y] == ' ' || maze[x][y] == 'E'){
 		Coordinate next = new Coordinate(x, y, previous);
-		deque.add(next);
+		if(pQue){
+		    queue.add(next);
+		}else{
+		    if (stack){
+			deque.addFirst(next);
+		    }else{
+			deque.addLast(next);
+		    }
+		}
+		
 	    }
 	}
     }
     
-    private void addNeighbors(MyDeque<Coordinate> deque, boolean stack, Coordinate current){
-	addIfValid(deque, current.x + 1, current.y, stack, current);
-	addIfValid(deque, current.x - 1, current.y, stack, current);
-	addIfValid(deque, current.x, current.y + 1, stack, current);
-	addIfValid(deque, current.x, current.y - 1, stack, current);
+    private void addNeighbors(PriorityQueue<Coordinate> queue, ArrayDeque deque, boolean pQue, boolean stack, Coordinate current){
+	addIfValid(queue, deque, pQue, stack, current.x + 1, current.y, current);
+	addIfValid(queue, deque, pQue, stack, current.x - 1, current.y, current);
+	addIfValid(queue, deque, pQue, stack, current.x, current.y + 1, current);
+	addIfValid(queue, deque, pQue, stack, current.x, current.y - 1, current);
     }
    
 
-    /* public boolean solveBFS(){
-	return solveBFS(false);
-    }
-    public boolean solveDFS(){
-    return solveDFS(false);
-    }
-    public boolean solveBFS(boolean animate){  
-    return solve(animate, false);
-    }
-    public boolean solveDFS(boolean animate){
-    return solve(animate, true);
-    }
-
-    */
+   
     public int[] solutionCoordinates(){
 	int[] numberCoords = new int[solutionCoordsLength * 2];
 	int i = 0;
@@ -164,10 +205,6 @@ public class Maze{
 	solutionCoordsLength = solutionCoordsLength + 1;
     }
 
-    public String name(){
-	return "ansorge.ethan";
-    }
-
     public void printCoords(){
 	int i = solutionCoordsLength - 1;
 	while (i > 1 && solutionCoordinates[i] != null){
@@ -176,9 +213,13 @@ public class Maze{
 	}
     }
 
+    public String name(){
+	return "ansorge.ethan";
+    }
+
     public static void main (String [] args){
 	Maze a = new Maze("data1.dat");
-	a.solve(true, false);
+	a.solve(true, false, true, false);
 	a.printCoords();
 	/*
 	  int i = a.solutionCoordsLength - 1;

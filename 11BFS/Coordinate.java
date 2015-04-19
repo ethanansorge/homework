@@ -1,6 +1,5 @@
 public class Coordinate implements Comparable<Coordinate>{
-    public int endX, endY;
-
+    public static int endX, endY;
     public int x, y;
     public Coordinate previous;
 
