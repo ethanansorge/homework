@@ -3,6 +3,9 @@ public class Coordinate implements Comparable<Coordinate>{
     public int x, y;
     public Coordinate previous;
 
+    public Coordinate(){
+    }
+
     public Coordinate(int x, int y, Coordinate previous){
 	this.x = x;
 	this.y = y;
@@ -15,5 +18,7 @@ public class Coordinate implements Comparable<Coordinate>{
     public int compareTo(Coordinate other){
 	return (distance(this) - distance(other));
     }
-	
+    public String toString(){
+	return x + ", " + y;
+    }
 }

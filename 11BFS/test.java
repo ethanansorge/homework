@@ -4,7 +4,14 @@ public class PriorityQueue <T extends Comparable<T>>{
     ArrayList<T> elements = new ArrayList<T>();
 
     public void add (T value){
+	elements.add(value);
+    }
+
+	
+    
+    /* public void add (T value){
 	int i = elements.size();
+	
 	if (i == 0){
 	    elements.add(value);
 	}else{
@@ -12,9 +19,11 @@ public class PriorityQueue <T extends Comparable<T>>{
 	    elements.set(i, elements.get(i - 1));
 	    i = i - 1;
 	}
-	elements.set(i, value);
+	
+	elements.add(i, value);
 	}
     }
+    */
 	// Loop through elements starting at back
 	   // Continue if the element you are adding is greater than the one before
 	   // Shift element over
@@ -22,11 +31,26 @@ public class PriorityQueue <T extends Comparable<T>>{
     public String toString(){
 	return elements.toString();
     }
-
-    public T remove(){
-	return elements.remove(elements.size() - 1);
-    }
     
+    public T remove(){
+	int i = elements.size();
+	if (i == 1){
+	    return elements.remove(0);
+	}
+	int smallestIndex = i - 1;
+	while( i > 0){
+	    if (elements.get(i - 1).compareTo(elements.get(smallestIndex)) < 0){
+		smallestIndex = i - 1;
+		/*	temp = elements.get(i - 1);
+		elements.set(i - 1, smallest);
+		smallest = temp;
+		*/
+	    }
+	    i = i - 1;
+	}
+	return elements.remove(smallestIndex);
+    }
+
     public boolean isEmpty(){
 	return elements.isEmpty();
     }
@@ -39,5 +63,20 @@ public class PriorityQueue <T extends Comparable<T>>{
 	    i = i + 1;
 	}
 	System.out.println(test.toString());
+	test.remove();
+	System.out.println(test.toString());
+	test.remove();
+	System.out.println(test.toString());
+	test.remove();
+	System.out.println(test.toString());
+	test.remove();
+	System.out.println(test.toString());
+	test.remove();
+	System.out.println(test.toString());
+	test.remove();
+	System.out.println(test.toString());
+	test.remove();
+	System.out.println(test.toString());
+
     }
 }

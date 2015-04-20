@@ -158,7 +158,12 @@ public class Maze{
 	maze[current.x][current.y] = '.';
 	if(animate){
 	    System.out.println(this);
-	    wait(20);
+	    if (pQue){
+		System.out.println(queue.toString());
+	    }else{
+		System.out.println(deque.toString());
+	    }
+	    wait(100);
 	}
 	return false;
     }
@@ -218,8 +223,8 @@ public class Maze{
     }
 
     public static void main (String [] args){
-	Maze a = new Maze("data1.dat");
-	a.solve(true, false, true, false);
+	Maze a = new Maze("data3.dat");
+	a.solve(true, false, false, false);
 	a.printCoords();
 	/*
 	  int i = a.solutionCoordsLength - 1;
