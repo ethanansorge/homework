@@ -1,10 +1,22 @@
 public class TreeNode{
-    public Treenode right, left;
-    public int value;
+    private Treenode right, left;
+    private T value;
     
-    public TreeNode(Treenode right, Treenode left, int value){
-	this.right = right;
-	this.left = left;
-	this.value = value;
+    public TreeNode(Treenode rightNode, Treenode leftNode, T valueOfNode){
+	right = rightNode
+	left = leftNode
+	    value = valueOfNode;
+    }
+    public void setValue(T newValue){
+	value = newValue;
+    }
+    public T getValue(){
+	return value;
+    }
+    public TreeNode getLeft(){
+	return left;
+    }
+    public TreeNode getRight(){
+	return right;
     }
 }
