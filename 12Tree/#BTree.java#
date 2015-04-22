@@ -1,0 +1,6 @@
+public class BTree{
+    public void add (int value){
+	if( both children are taken){
+	    add to subtree;
+	}
+	
