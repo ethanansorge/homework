@@ -21,10 +21,6 @@ public class PriorityQueue <T extends Comparable<T>>{
 	while( i > 0){
 	    if (elements.get(i - 1).compareTo(elements.get(smallestIndex)) < 0){
 		smallestIndex = i - 1;
-		/*	temp = elements.get(i - 1);
-		elements.set(i - 1, smallest);
-		smallest = temp;
-		*/
 	    }
 	    i = i - 1;
 	}

@@ -1,7 +1,7 @@
 public class Coordinate implements Comparable<Coordinate>{
-    public static int endX, endY;
-    public int x, y;
-    public Coordinate previous;
+    private int endX, endY;
+    private int x, y;
+    private Coordinate previous;
 
     public Coordinate(){
     }
@@ -20,5 +20,36 @@ public class Coordinate implements Comparable<Coordinate>{
     }
     public String toString(){
 	return x + ", " + y;
+    }
+    
+    public Coordinate getPrevious(){
+	return previous;
+    }
+    public int getX(){
+	return x;
+    }
+    public int getY(){
+	return y;
+    }
+    public void setPrevious(Coordinate c){
+	previous = c;
+    }
+    public void setX(int newX){
+	x = newX;
+    }
+    public void setY(int newY){
+	y = newY;
+    }
+    public int getEndX(){
+	return endX;
+    }
+    public int getEndY(){
+	return endY;
+    }
+    public void setEndX(int newEndX){
+	endX = newEndX;
+    }
+    public void setEndY(int newEndY){
+	endY = newEndY;
     }
 }

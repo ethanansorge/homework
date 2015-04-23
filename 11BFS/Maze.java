@@ -50,8 +50,8 @@ public class Maze{
 		starty = i / maxx;
 	    }
 	    if (c == 'E'){
-	       	Coordinate.endX = i % maxx;
-		Coordinate.endX = i / maxx;
+	       	Coordinate.setEndX(i % maxx);
+		Coordinate.setEndY(i / maxx);
 	    }
 	}
 	solutionCoordinates = new Coordinate[maxx * maxy];
@@ -146,16 +146,16 @@ public class Maze{
     }
     
     private boolean checkAndAdd(boolean pQue, boolean stack, Coordinate current, boolean animate, PriorityQueue<Coordinate> queue, ArrayDeque deque){
-	if (maze[current.x][current.y] == 'E'){
-	    while(current.previous != null){
+	if (maze[current.getX()][current.getY()] == 'E'){
+	    while(current.getPrevious() != null){
 		addCoordinateToSolutionArray(current);
-		current = current.previous;
+		current = current.getPrevious();
 	    }
 	    return true;
 	}
-	maze[current.x][current.y] = '@';
+	maze[current.getX()][current.getY()] = '@';
 	addNeighbors(queue, deque, pQue, stack, current);
-	maze[current.x][current.y] = '.';
+	maze[current.getX()][current.getY()] = '.';
 	if(animate){
 	    System.out.println(this);
 	    if (pQue){
@@ -186,10 +186,10 @@ public class Maze{
     }
     
     private void addNeighbors(PriorityQueue<Coordinate> queue, ArrayDeque deque, boolean pQue, boolean stack, Coordinate current){
-	addIfValid(queue, deque, pQue, stack, current.x + 1, current.y, current);
-	addIfValid(queue, deque, pQue, stack, current.x - 1, current.y, current);
-	addIfValid(queue, deque, pQue, stack, current.x, current.y + 1, current);
-	addIfValid(queue, deque, pQue, stack, current.x, current.y - 1, current);
+	addIfValid(queue, deque, pQue, stack, current.getX() + 1, current.setY(), current);
+	addIfValid(queue, deque, pQue, stack, current.getX() - 1, current.setY(), current);
+	addIfValid(queue, deque, pQue, stack, current.getX(), current.setY() + 1, current);
+	addIfValid(queue, deque, pQue, stack, current.getX(), current.setY() - 1, current);
     }
    
 
