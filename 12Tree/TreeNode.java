@@ -25,4 +25,7 @@ public class TreeNode<T>{
     public void setRight(TreeNode<T> node){
 	right = node;
     }
+    public String toString(){
+	return "" + value;
+    }
 }
