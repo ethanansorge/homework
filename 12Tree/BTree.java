@@ -36,7 +36,7 @@ public class BTree<T> {
       ====================*/     
     public void add( T d ) {
 	TreeNode<T> node = new TreeNode<T>(null, null, d);
-	
+	add(root, node);
     }
 
     /*======== public void add() ==========
@@ -51,6 +51,14 @@ public class BTree<T> {
       added to randomly.
       ====================*/
     private void add( TreeNode<T> curr, TreeNode<T> bn ) {
+	while (curr.getLeft() != null && curr.getRight() != null){
+	    curr = curr.getLeft();
+	}
+	if (curr.getLeft() == null){
+	    curr.setLeft(bn);
+	}else{
+	    curr.setRight(bn);
+	}
     }
     
     public void traverse( int mode) {

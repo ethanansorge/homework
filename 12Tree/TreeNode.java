@@ -2,7 +2,7 @@ public class TreeNode<T>{
     private TreeNode<T> right, left;
     private T value;
     
-    public TreeNode(TreeNode rightNode, TreeNode leftNode, T valueOfNode){
+    public TreeNode(TreeNode<T> rightNode, TreeNode<T> leftNode, T valueOfNode){
 	right = rightNode;
 	left = leftNode;
 	value = valueOfNode;
@@ -13,16 +13,16 @@ public class TreeNode<T>{
     public T getValue(){
 	return value;
     }
-    public TreeNode getLeft(){
+    public TreeNode<T> getLeft(){
 	return left;
     }
-    public TreeNode getRight(){
+    public TreeNode<T> getRight(){
 	return right;
     }
-    public void setLeft(TreeNode node){
+    public void setLeft(TreeNode<T> node){
 	left = node;
     }
-    public void setRight(TreeNode node){
+    public void setRight(TreeNode<T> node){
 	right = node;
     }
 }
