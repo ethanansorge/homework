@@ -11,11 +11,13 @@ public class Maze{
     private String show =  "\033[?25h";
     private Coordinate[] solutionCoordinates;
     private int solutionCoordsLength = 0;
+    private int distanceFromStart;
     private String go(int x,int y){
 	return ("\033[" + x + ";" + y + "H");
     }
 
     public Maze(String filename){
+	distanceFromStart = 0;
 	startx = -1;
 	starty = -1;
 	//read the whole maze into a single string first
@@ -119,14 +121,14 @@ public class Maze{
     }    
 
     public boolean solve(boolean animate, boolean pQue, boolean stack, boolean best){
-	Coordinate head = new Coordinate(0,0,null, endx, endy);
-	Coordinate first = new Coordinate(startx, starty, head,endx, endy);
+	Coordinate head = new Coordinate(0,0,null, endx, endy, distanceFromStart);
+	Coordinate first = new Coordinate(startx, starty, head,endx, endy, distanceFromStart);
 	boolean done;
 	if (pQue){
 	    PriorityQueue<Coordinate> queue = new PriorityQueue<Coordinate>();
 	    queue.add(first);
 	    while(!queue.isEmpty()){
-		Coordinate current = queue.remove();
+		Coordinate current = queue.remove(best);
 		done = checkAndAdd(true, stack, current, animate, queue, null);
 		if(done){
 		    return true;
@@ -171,9 +173,11 @@ public class Maze{
     private void addIfValid(PriorityQueue<Coordinate> queue, ArrayDeque deque, boolean pQue, boolean stack, int x, int y, Coordinate previous){
 	if (0 <= x && x < maze.length && 0 <= y && y < maze[0].length){
 	    if (maze[x][y] == ' ' || maze[x][y] == 'E'){
-		Coordinate next = new Coordinate(x, y, previous, endx, endy);
+		distanceFromStart = distanceFromStart + 1;
+		Coordinate next = new Coordinate(x, y, previous, endx, endy, distanceFromStart);
 		if(pQue){
 		    queue.add(next);
+		    
 		}else{
 		    if (stack){
 			deque.addFirst(next);
@@ -225,7 +229,7 @@ public class Maze{
 
     public static void main (String [] args){
 	Maze a = new Maze("data1.dat");
-	a.solve(true, true, false, false);
+	a.solve(true, true, false, true);
 	a.printCoords();
 	/*
 	  int i = a.solutionCoordsLength - 1;

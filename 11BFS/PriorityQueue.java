@@ -12,16 +12,22 @@ public class PriorityQueue <T extends Comparable<T>>{
 	elements.add(value);
     }
     
-    public T remove(){
+    public T remove(boolean best){
 	int i = elements.size();
 	if (i == 1){
 	    return elements.remove(0);
 	}
 	int smallestIndex = i - 1;
 	while( i > 0){
-	    if (elements.get(i - 1).compareTo(elements.get(smallestIndex)) < 0){
+	    //if(best){
+		if (elements.get(i - 1).compareTo(elements.get(smallestIndex)) < 0){
 		smallestIndex = i - 1;
 	    }
+		/* }else{
+		if (elements.get(i - 1).compareAStar(elements.get(smallestIndex), false) < 0){
+		smallestIndex = i - 1;
+		}
+		} */
 	    i = i - 1;
 	}
 	return elements.remove(smallestIndex);

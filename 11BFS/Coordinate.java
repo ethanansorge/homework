@@ -2,21 +2,28 @@ public class Coordinate implements Comparable<Coordinate>{
     private int endX, endY;
     private int x, y;
     private Coordinate previous;
-
+    private int distanceFromStart;
     public Coordinate(){
     }
 
-    public Coordinate(int x, int y, Coordinate previous, int endX, int endY){
+    public Coordinate(int x, int y, Coordinate previous, int endX, int endY, int distanceFromStart){
 	this.x = x;
 	this.y = y;
 	this.previous = previous;
 	this.endX = endX;
 	this.endY = endY;
+	this.distanceFromStart = distanceFromStart;
     }
     public static int distance (Coordinate c){
 	return ( Math.abs(c.getX() - c.getEndX()) + Math.abs(c.getY() - c.getEndY()));
     }
-
+    public int getDistanceFromStart(){
+	return distanceFromStart;
+    }
+    public int compareAStar(Coordinate other, boolean best){
+	return ((distance(this) + this.getDistanceFromStart()) - (this.getDistanceFromStart() + distance(other)));
+    }
+    
     public int compareTo(Coordinate other){
 	return (distance(this) - distance(other));
     }
