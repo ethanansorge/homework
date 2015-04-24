@@ -155,7 +155,15 @@ public class BTree<T> {
       
       ====================*/
     private String getLevel( TreeNode<T> curr, int level, int currLevel ) {
-	return "";
+	if (curr == null){
+	    return "";
+	}
+        if (currLevel == level){
+	    return curr + "";
+	}
+	return getLevel(curr.getLeft(), level, currLevel - 1);
+	return getLevel(curr.getRight(), level, currLevel - 1);
+	    
     }
     
     /*======== public String toString()) ==========
@@ -177,6 +185,7 @@ public class BTree<T> {
       3  4   5
       ====================*/
     public String toString() {
+
 	return "";
     }
 	
