@@ -6,13 +6,15 @@ public class Coordinate implements Comparable<Coordinate>{
     public Coordinate(){
     }
 
-    public Coordinate(int x, int y, Coordinate previous){
+    public Coordinate(int x, int y, Coordinate previous, int endX, int endY){
 	this.x = x;
 	this.y = y;
 	this.previous = previous;
+	this.endX = endX;
+	this.endY = endY;
     }
     public static int distance (Coordinate c){
-	return ( Math.abs(c.x - endX) + Math.abs(c.y = endY));
+	return ( Math.abs(c.getX() - c.getEndX()) + Math.abs(c.getY() - c.getEndY()));
     }
 
     public int compareTo(Coordinate other){
@@ -45,11 +47,5 @@ public class Coordinate implements Comparable<Coordinate>{
     }
     public int getEndY(){
 	return endY;
-    }
-    public void setEndX(int newEndX){
-	endX = newEndX;
-    }
-    public void setEndY(int newEndY){
-	endY = newEndY;
     }
 }

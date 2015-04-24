@@ -5,6 +5,7 @@ public class Maze{
     private char[][] maze;
     private int maxx,maxy;
     private int startx,starty;
+    private int endx, endy;
     private String clear =  "\033[2J";
     private String hide =  "\033[?25l";
     private String show =  "\033[?25h";
@@ -50,8 +51,8 @@ public class Maze{
 		starty = i / maxx;
 	    }
 	    if (c == 'E'){
-	       	Coordinate.setEndX(i % maxx);
-		Coordinate.setEndY(i / maxx);
+		endx = i % maxx;
+		endy = i / maxx;
 	    }
 	}
 	solutionCoordinates = new Coordinate[maxx * maxy];
@@ -118,8 +119,8 @@ public class Maze{
     }    
 
     public boolean solve(boolean animate, boolean pQue, boolean stack, boolean best){
-	Coordinate head = new Coordinate(0,0,null);
-	Coordinate first = new Coordinate(startx, starty, head);
+	Coordinate head = new Coordinate(0,0,null, endx, endy);
+	Coordinate first = new Coordinate(startx, starty, head,endx, endy);
 	boolean done;
 	if (pQue){
 	    PriorityQueue<Coordinate> queue = new PriorityQueue<Coordinate>();
@@ -158,19 +159,19 @@ public class Maze{
 	maze[current.getX()][current.getY()] = '.';
 	if(animate){
 	    System.out.println(this);
+	    wait(20);
 	    if (pQue){
 		System.out.println(queue.toString());
 	    }else{
 		System.out.println(deque.toString());
 	    }
-	    wait(100);
 	}
 	return false;
     }
     private void addIfValid(PriorityQueue<Coordinate> queue, ArrayDeque deque, boolean pQue, boolean stack, int x, int y, Coordinate previous){
 	if (0 <= x && x < maze.length && 0 <= y && y < maze[0].length){
 	    if (maze[x][y] == ' ' || maze[x][y] == 'E'){
-		Coordinate next = new Coordinate(x, y, previous);
+		Coordinate next = new Coordinate(x, y, previous, endx, endy);
 		if(pQue){
 		    queue.add(next);
 		}else{
@@ -186,10 +187,10 @@ public class Maze{
     }
     
     private void addNeighbors(PriorityQueue<Coordinate> queue, ArrayDeque deque, boolean pQue, boolean stack, Coordinate current){
-	addIfValid(queue, deque, pQue, stack, current.getX() + 1, current.setY(), current);
-	addIfValid(queue, deque, pQue, stack, current.getX() - 1, current.setY(), current);
-	addIfValid(queue, deque, pQue, stack, current.getX(), current.setY() + 1, current);
-	addIfValid(queue, deque, pQue, stack, current.getX(), current.setY() - 1, current);
+	addIfValid(queue, deque, pQue, stack, current.getX() + 1, current.getY(), current);
+	addIfValid(queue, deque, pQue, stack, current.getX() - 1, current.getY(), current);
+	addIfValid(queue, deque, pQue, stack, current.getX(), current.getY() + 1, current);
+	addIfValid(queue, deque, pQue, stack, current.getX(), current.getY() - 1, current);
     }
    
 
@@ -198,8 +199,8 @@ public class Maze{
 	int[] numberCoords = new int[solutionCoordsLength * 2];
 	int i = 0;
 	while (i < numberCoords.length -2){
-	    numberCoords[i] = (solutionCoordinates[(numberCoords.length - 2) - i]).x;
-	    numberCoords[i + 1] = (solutionCoordinates[(numberCoords.length - 2) - i]).y;
+	    numberCoords[i] = (solutionCoordinates[(numberCoords.length - 2) - i]).getX();
+	    numberCoords[i + 1] = (solutionCoordinates[(numberCoords.length - 2) - i]).getY();
 	    i = i - 2;
 	}
 	return numberCoords;
@@ -213,7 +214,7 @@ public class Maze{
     public void printCoords(){
 	int i = solutionCoordsLength - 1;
 	while (i > 1 && solutionCoordinates[i] != null){
-	    System.out.print("(" + (solutionCoordinates[i]).x + ", " + (solutionCoordinates[i]).y + ")" );
+	    System.out.print("(" + (solutionCoordinates[i]).getX() + ", " + (solutionCoordinates[i]).getY() + ")" );
 	    i = i - 1;
 	}
     }
@@ -223,8 +224,8 @@ public class Maze{
     }
 
     public static void main (String [] args){
-	Maze a = new Maze("data3.dat");
-	a.solve(true, false, false, false);
+	Maze a = new Maze("data1.dat");
+	a.solve(true, true, false, false);
 	a.printCoords();
 	/*
 	  int i = a.solutionCoordsLength - 1;
