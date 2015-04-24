@@ -121,15 +121,15 @@ public class Maze{
     }    
 
     public boolean solve(boolean animate, boolean pQue, boolean stack, boolean best){
-	Coordinate head = new Coordinate(0,0,null, endx, endy, distanceFromStart);
-	Coordinate first = new Coordinate(startx, starty, head,endx, endy, distanceFromStart);
+	Coordinate head = new Coordinate(0,0,null, endx, endy, 0);
+	Coordinate first = new Coordinate(startx, starty, head,endx, endy, 0);
 	boolean done;
 	if (pQue){
 	    PriorityQueue<Coordinate> queue = new PriorityQueue<Coordinate>();
 	    queue.add(first);
 	    while(!queue.isEmpty()){
 		Coordinate current = queue.remove(best);
-		done = checkAndAdd(true, stack, current, animate, queue, null);
+		done = checkAndAdd(true, stack, current, best, animate, queue, null);
 		if(done){
 		    return true;
 		}
@@ -139,7 +139,7 @@ public class Maze{
 	    deque.addLast(first);
 	    while(!deque.isEmpty()){
 		Coordinate current = deque.removeFirst();
-		done = checkAndAdd(false, stack, current, animate, null, deque);
+		done = checkAndAdd(false, stack, current, best, animate, null, deque);
 		if (done){
 		    return true;
 		}
@@ -148,7 +148,7 @@ public class Maze{
 	return false;
     }
     
-    private boolean checkAndAdd(boolean pQue, boolean stack, Coordinate current, boolean animate, PriorityQueue<Coordinate> queue, ArrayDeque deque){
+    private boolean checkAndAdd(boolean pQue, boolean stack, Coordinate current, boolean best, boolean animate, PriorityQueue<Coordinate> queue, ArrayDeque deque){
 	if (maze[current.getX()][current.getY()] == 'E'){
 	    while(current.getPrevious() != null){
 		addCoordinateToSolutionArray(current);
@@ -157,7 +157,7 @@ public class Maze{
 	    return true;
 	}
 	maze[current.getX()][current.getY()] = '@';
-	addNeighbors(queue, deque, pQue, stack, current);
+	addNeighbors(queue, deque, pQue, stack, current, best);
 	maze[current.getX()][current.getY()] = '.';
 	if(animate){
 	    System.out.println(this);
@@ -170,11 +170,16 @@ public class Maze{
 	}
 	return false;
     }
-    private void addIfValid(PriorityQueue<Coordinate> queue, ArrayDeque deque, boolean pQue, boolean stack, int x, int y, Coordinate previous){
+    private void addIfValid(PriorityQueue<Coordinate> queue, ArrayDeque deque, boolean pQue, boolean stack, int x, int y, Coordinate previous, boolean best){
 	if (0 <= x && x < maze.length && 0 <= y && y < maze[0].length){
 	    if (maze[x][y] == ' ' || maze[x][y] == 'E'){
 		distanceFromStart = distanceFromStart + 1;
-		Coordinate next = new Coordinate(x, y, previous, endx, endy, distanceFromStart);
+		Coordinate next;
+		if (!best){
+		    next = new Coordinate(x, y, previous, endx, endy, distanceFromStart);
+		}else{
+		    next = new Coordinate(x, y, previous, endx, endy);
+		}
 		if(pQue){
 		    queue.add(next);
 		    
@@ -190,11 +195,11 @@ public class Maze{
 	}
     }
     
-    private void addNeighbors(PriorityQueue<Coordinate> queue, ArrayDeque deque, boolean pQue, boolean stack, Coordinate current){
-	addIfValid(queue, deque, pQue, stack, current.getX() + 1, current.getY(), current);
-	addIfValid(queue, deque, pQue, stack, current.getX() - 1, current.getY(), current);
-	addIfValid(queue, deque, pQue, stack, current.getX(), current.getY() + 1, current);
-	addIfValid(queue, deque, pQue, stack, current.getX(), current.getY() - 1, current);
+    private void addNeighbors(PriorityQueue<Coordinate> queue, ArrayDeque deque, boolean pQue, boolean stack, Coordinate current, boolean best){
+	addIfValid(queue, deque, pQue, stack, current.getX() + 1, current.getY(), current, best);
+	addIfValid(queue, deque, pQue, stack, current.getX() - 1, current.getY(), current, best);
+	addIfValid(queue, deque, pQue, stack, current.getX(), current.getY() + 1, current, best);
+	addIfValid(queue, deque, pQue, stack, current.getX(), current.getY() - 1, current, best);
     }
    
 
@@ -229,7 +234,7 @@ public class Maze{
 
     public static void main (String [] args){
 	Maze a = new Maze("data1.dat");
-	a.solve(true, true, false, true);
+	a.solve(true, true, false, false);
 	a.printCoords();
 	/*
 	  int i = a.solutionCoordsLength - 1;

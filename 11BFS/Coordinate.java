@@ -5,7 +5,9 @@ public class Coordinate implements Comparable<Coordinate>{
     private int distanceFromStart;
     public Coordinate(){
     }
-
+     public Coordinate(int x, int y, Coordinate previous, int endX, int endY){
+	 this(x,y,previous,endX,endY,0);
+     }
     public Coordinate(int x, int y, Coordinate previous, int endX, int endY, int distanceFromStart){
 	this.x = x;
 	this.y = y;
@@ -20,12 +22,9 @@ public class Coordinate implements Comparable<Coordinate>{
     public int getDistanceFromStart(){
 	return distanceFromStart;
     }
-    public int compareAStar(Coordinate other, boolean best){
-	return ((distance(this) + this.getDistanceFromStart()) - (this.getDistanceFromStart() + distance(other)));
-    }
     
     public int compareTo(Coordinate other){
-	return (distance(this) - distance(other));
+	return ((distance(this) + this.getDistanceFromStart())- (other.getDistanceFromStart() + distance(other)));
     }
     public String toString(){
 	return x + ", " + y;
