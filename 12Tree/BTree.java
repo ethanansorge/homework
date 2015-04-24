@@ -50,9 +50,15 @@ public class BTree<T> {
       one of curr's children. Choose the child to be
       added to randomly.
       ====================*/
-    private void add( TreeNode<T> curr, TreeNode<T> bn ) {
+    private void add( TreeNode<T> curr, TreeNode<T> bn ){
+	Random rand = new Random();
 	while (curr.getLeft() != null && curr.getRight() != null){
-	    curr = curr.getLeft();
+	    int randomNumber = rand.nextInt(2) + 1; 
+	    if (randomNumber % 2 = 0){
+		curr = curr.getLeft();
+	    }else{
+		curr = cirr.getRight();
+	    }
 	}
 	if (curr.getLeft() == null){
 	    curr.setLeft(bn);
@@ -155,14 +161,13 @@ public class BTree<T> {
       
       ====================*/
     private String getLevel( TreeNode<T> curr, int level, int currLevel ) {
-	if (curr == null){
+	if (curr == null || currLevel > level){
 	    return "";
 	}
         if (currLevel == level){
 	    return curr + "";
 	}
-	return getLevel(curr.getLeft(), level, currLevel - 1);
-	return getLevel(curr.getRight(), level, currLevel - 1);
+	return getLevel(curr.getLeft(), level, currLevel + 1) + getLevel(curr.getRight(), level, currLevel + 1);
 	    
     }
     
@@ -185,7 +190,8 @@ public class BTree<T> {
       3  4   5
       ====================*/
     public String toString() {
-
+	String a =getLevel(root, 0, 0) ;
+	
 	return "";
     }
 	
@@ -204,6 +210,6 @@ public class BTree<T> {
 	t.traverse( POST_ORDER );
 	System.out.println( "Height: " + t.getHeight() );
 
-	System.out.println( t );
+
     }
 }
