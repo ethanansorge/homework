@@ -78,7 +78,7 @@ public class BTree<T> {
 	    inOrder( root );
 	else
 	    postOrder( root );
-	System.out.println();
+	//System.out.println();
     }
     /*======== public void preOrder() ==========
       Inputs:   TreeNode<E> curr  
@@ -91,9 +91,13 @@ public class BTree<T> {
 	if (curr == null){
 	    return;
 	}
-	System.out.println(curr.getValue() + " ");
-	preOrder(curr.getLeft());
-	preOrder(curr.getRight());
+	if(curr.isLeaf()){
+	    System.out.println(curr.getValue());
+	}else{  
+	    System.out.println(curr.getValue() + " ");
+	    preOrder(curr.getLeft());
+	    preOrder(curr.getRight());
+	}
     }
 
 
@@ -108,9 +112,13 @@ public class BTree<T> {
 	if (curr == null){
 	    return;
 	}
+	if(curr.isLeaf()){
+	    System.out.println(curr.getValue());
+	}else{  
 	inOrder(curr.getLeft());
 	System.out.println(curr.getValue() + " ");
 	inOrder(curr.getRight());
+	}
     }
     
     /*======== public void postOrder() ==========
@@ -124,9 +132,13 @@ public class BTree<T> {
 	if (curr == null){
 	    return;
 	}
+	if(curr.isLeaf()){
+	    System.out.println(curr.getValue());
+	}else{  
 	postOrder(curr.getLeft());
 	postOrder(curr.getRight());
         System.out.println(curr.getValue() + " ");
+	}
     }
     
     /*======== public int getHeight()) ==========
@@ -226,7 +238,7 @@ public class BTree<T> {
 	System.out.println( "Post-order: ");
 	t.traverse( POST_ORDER );
 	System.out.println( "Height: " + t.getHeight() ); 
-
+	
 
     }
 }

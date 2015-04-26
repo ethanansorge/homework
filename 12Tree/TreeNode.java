@@ -31,4 +31,7 @@ public class TreeNode<T>{
     public String toString(){
 	return value + " ";
     }
+    public boolean isLeaf(){
+	return right == null && left == null;
+    }
 }
