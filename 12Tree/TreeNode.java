@@ -2,6 +2,9 @@ public class TreeNode<T>{
     private TreeNode<T> right, left;
     private T value;
     
+    public TreeNode (T valueOfNode){
+	value = valueOfNode;
+    }
     public TreeNode(TreeNode<T> rightNode, TreeNode<T> leftNode, T valueOfNode){
 	right = rightNode;
 	left = leftNode;
@@ -26,6 +29,6 @@ public class TreeNode<T>{
 	right = node;
     }
     public String toString(){
-	return "" + value;
+	return value + " ";
     }
 }
