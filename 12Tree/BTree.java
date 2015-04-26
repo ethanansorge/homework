@@ -51,20 +51,20 @@ public class BTree<T> {
       added to randomly.
       ====================*/
     private void add( TreeNode<T> curr, TreeNode<T> bn ){
-	Random rand = new Random();
-	while (curr.getLeft() != null && curr.getRight() != null){
-	    int randomNumber = rand.nextInt(2) + 1; 
-	    if (randomNumber % 2 = 0){
-		curr = curr.getLeft();
+	    if(curr.getLeft() == null){
+		curr.setLeft(bn);
 	    }else{
-		curr = cirr.getRight();
+		if(curr.getRight() == null){
+		    curr.setRight(bn);
+		}
+		Random rand = new Random();
+		int randomNum = rand.nextInt(2); 
+		if (randomNum == 0){
+		    add(curr.getLeft(), bn);
+		}else{
+		    add(curr.getRight(), bn);
+		}
 	    }
-	}
-	if (curr.getLeft() == null){
-	    curr.setLeft(bn);
-	}else{
-	    curr.setRight(bn);
-	}
     }
     
     public void traverse( int mode) {
@@ -160,7 +160,7 @@ public class BTree<T> {
       given level, ordered left -> right
       
       ====================*/
-    private String getLevel( TreeNode<T> curr, int level, int currLevel ) {
+    private String getLevel( TreeNode<T> curr, int level, int currLevel) {
 	if (curr == null || currLevel > level){
 	    return "";
 	}
@@ -190,9 +190,14 @@ public class BTree<T> {
       3  4   5
       ====================*/
     public String toString() {
-	String a =getLevel(root, 0, 0) ;
-	
-	return "";
+	String a = "" ;
+	int i = 0;
+	int x = getHeight();
+	while (i < x){
+	    a = a + getLevel(root,i,0) + "\n";
+	    i = i + 1;
+	}
+	return a;
     }
 	
 
