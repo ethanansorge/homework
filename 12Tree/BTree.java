@@ -91,15 +91,13 @@ public class BTree<T> {
 	if (curr == null){
 	    return;
 	}
-	if(curr.isLeaf()){
-	    System.out.println(curr.getValue());
-	}else{  
-	    System.out.println(curr.getValue() + " ");
+	System.out.println(curr.getValue() + " ");
+	if(!curr.isLeaf()){
 	    preOrder(curr.getLeft());
 	    preOrder(curr.getRight());
 	}
     }
-
+    
 
     /*======== public void inOrder() ==========
       Inputs:   TreeNode<E> curr  
