@@ -6,10 +6,12 @@ public class MyHeap{
 
     public MyHeap(){
 	values = new ArrayList<Integer>();
+	values.add(0);
 	max = true;
     }
     public MyHeap(boolean isMax){
 	values = new ArrayList<Integer>();
+	values.add(0);
 	max = isMax;
     }
     public void add(int value){
@@ -35,7 +37,7 @@ public class MyHeap{
 	return 0;
     }
     public int peek(){
-	return 0;
+	return values.get(1);
     }
     public String toString(){
 	return "";
