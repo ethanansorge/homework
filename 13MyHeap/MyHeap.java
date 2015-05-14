@@ -20,16 +20,19 @@ public class MyHeap{
 	    temp = values.get(i);
 	    if (max){
 		if (value < temp){		    
-		    break;
+		    values.add(i, value);
+		    return;
 		}
 	    }else{
 		if (value > temp){		    
-		    break;
+		    values.add(i, value);
+		    return;
 		}
 	    }
 	    i = i / 2;
 	}
 	values.add(i, value);
+	values.remove(values.size() - 1);
     }
     public int remove(){
 	if (values.size() == 1){
@@ -64,10 +67,21 @@ public class MyHeap{
     }
     public static void main(String [] args){
 	MyHeap heap = new MyHeap(true);
-	//heap.add(1);
-	System.out.println(heap.toString());
-	heap.remove();
-	System.out.println(heap.toString());
+	heap.add(1);
+	heap.add(7);
+        heap.add(4);
+	heap.add(9);
+	heap.add(2);
+	heap.add(3);
+	System.out.println(heap.toString() + "\n" + "\n");
+	MyHeap heap2 = new MyHeap(false);
+	heap2.add(1);
+	heap2.add(7);
+        heap2.add(4);
+	heap2.add(9);
+	heap2.add(2);
+	heap2.add(3);
+	System.out.println(heap2.toString());
     }
     
 }
