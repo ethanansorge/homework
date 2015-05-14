@@ -16,7 +16,7 @@ public class MyHeap{
     }
     public void add(int value){
 	values.add(value);
-	int i = values.size();
+	int i = values.size() - 1;
 	int temp;
 	while (i > 1){
 	    temp = values.get(i);
@@ -44,7 +44,23 @@ public class MyHeap{
 	return values.get(1);
     }
     public String toString(){
-	return "";
+        int i = 1;
+	String s = "";
+	while (i < values.size()){
+	    s = s + values.get(i) + ", ";
+	    i = i + 1;
+	}
+	return s;
+	    
+    }
+    public static void main(String [] args){
+	MyHeap heap = new MyHeap(true);
+	heap.add(1);
+	heap.add(7);
+	heap.add(6);
+	heap.add(9);
+	heap.remove();
+	System.out.println(heap.peek());
     }
     
 }
