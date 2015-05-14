@@ -34,7 +34,11 @@ public class MyHeap{
 	values.add(i, value);
     }
     public int remove(){
-	return 0;
+	if (max){
+	    return values.remove(1);
+	}else{
+	    return values.remove(values.size() - 1);
+	}
     }
     public int peek(){
 	return values.get(1);
