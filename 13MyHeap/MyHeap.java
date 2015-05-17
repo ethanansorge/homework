@@ -29,6 +29,13 @@ public class MyHeap{
 	if (values.size() == 1){
 	    throw new NoSuchElementException();
 	}
+	if (values.size() == 2){
+	    return values.remove(1);
+	}
+	int value = values.get(1);
+	values.set(1, values.get(values.size() - 1);
+	fixHeap(1);
+	return value;
 	
     }
     public void fixHeap(int index){
