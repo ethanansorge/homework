@@ -28,4 +28,20 @@ public class RunningMedian{
 	    return max.peek();
 	}
     }
+    public static void main(String [] args){
+	RunningMedian median = new RunningMedian();
+	median.add(71);
+	median.add(86);
+	median.add(79);
+	median.add(36);
+	median.add(78);
+	median.add(35);
+	median.add(75);
+	median.add(86);
+	median.add(24);
+	median.add(11); 
+	median.add(0);
+	median.add(-123);
+	System.out.println(median.getMedian());
+    }
 }
