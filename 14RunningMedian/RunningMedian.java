@@ -6,20 +6,26 @@ public class RunningMedian{
 	max = new MyHeap(true);
     }
     public void add(int value){
-	if (value > getMedian()){
-	    min.add(value);
-	}else{
+	if (max.getSize() >= 1 && value < max.peek()){
 	    max.add(value);
+	}else{
+	    min.add(value);
 	}
+	int dif = max.getSize() - min.getSize();
+	if (dif > 1){
+	    min.add(max.remove());
+	}else if(dif < - 1){
+	    max.add(min.remove());
+	}   
     }
     public double getMedian(){
-	if (min.values.size() == max.values.size()){
-	    return (min.values.get(1) + max.values.get(1)) / 2.0;
+	if (min.getSize() == max.getSize()){
+	    return (min.peek() + max.peek()) / 2.0;
 	}else{
-	    if (min.values.size() > max.values.size()){
-		return min.values.get(1);
+	    if (min.getSize() > max.getSize()){
+		return min.peek();
 	    }
-	    return max.values.get(1);
+	    return max.peek();
 	}
     }
 }

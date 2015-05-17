@@ -7,10 +7,14 @@ public class MyHeap{
     public MyHeap(){
 	this(true);
     }
+
     public MyHeap(boolean isMax){
 	values = new ArrayList<Integer>();
 	values.add(0);
 	max = isMax;
+    }
+    public int getSize(){
+	return values.size() - 1;
     }
     public void add(int value){
 	values.add(value);
