@@ -29,11 +29,19 @@ public class MyHeap{
 	if (values.size() == 1){
 	    throw new NoSuchElementException();
 	}
-	if (max){
-	    return values.remove(1);
-	}else{
-	    return values.remove(values.size() - 1);
+	
+    }
+    public void fixHeap(int index){
+	int maxIndex = index;
+	int leftIndex = index * 2;
+	int rightIndex = leftIndex + 1;
+	if (values.get(maxIndex) < values.get(left)){
+	    maxIndex = left;
 	}
+	if (values.get(maxIndex) < values.get(right)){
+	    maxIndex = right;
+	}
+	
     }
     public int peek(){
 	return values.get(1);
