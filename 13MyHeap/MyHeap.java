@@ -32,20 +32,20 @@ public class MyHeap{
 	
     }
     public void fixHeap(int index){
-	int maxIndex = index;
+	int extremeIndex = index;
 	int leftIndex = index * 2;
 	int rightIndex = leftIndex + 1;
-	if (values.get(maxIndex) < values.get(left)){
-	    maxIndex = left;
+	if ((max && values.get(extremeIndex) < values.get(left)) || (!max && values.get(extremeIndex) > values.get(left))){
+	    extremeIndex = left;
 	}
-	if (values.get(maxIndex) < values.get(right)){
-	    maxIndex = right;
+	if ((max && values.get(extremeIndex) < values.get(right)) || (!max && values.get(extremeIndex) > values.get(right))){
+	    extremeIndex = right;
 	}
-	if (index != maxIndex){
+	if (index != extremeIndex){
 	    int tempValue = values.get(index);
-	    values.set(index, values.get(maxIndex)):
-	    values.set(maxIndex, tempValue);
-	    fixHeap(maxIndex);
+	    values.set(index, values.get(extremeIndex)):
+	    values.set(extremeIndex, tempValue);
+	    fixHeap(extremeIndex);
 	}
     }
     public int peek(){
