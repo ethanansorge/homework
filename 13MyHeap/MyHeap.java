@@ -14,25 +14,16 @@ public class MyHeap{
     }
     public void add(int value){
 	values.add(value);
-	int i = values.size() - 1;
-	int temp;
-	while (i > 1){
-	    temp = values.get(i);
-	    if (max){
-		if (value < temp){		    
-		    values.add(i, value);
-		    return;
-		}
-	    }else{
-		if (value > temp){		    
-		    values.add(i, value);
-		    return;
-		}
-	    }
-	    i = i / 2;
+	int currIndex = values.size() - 1;
+	int parIndex = currIndex / 2;
+	while (parIndex >= 1 &&
+	       ((!max && value < values.get(parIndex)) || 
+		(max && value > values.get(parIndex)))){
+	    values.set(currIndex, values.get(parIndex));
+	    values.set(parIndex, value);
+	    currIndex = parIndex;
+	    parIndex = currIndex / 2;
 	}
-	values.add(i, value);
-	values.remove(values.size() - 1);
     }
     public int remove(){
 	if (values.size() == 1){
@@ -47,7 +38,7 @@ public class MyHeap{
     public int peek(){
 	return values.get(1);
     }
-    public String toString(){
+    /* public String toString(){
         int index = 1;
 	int newLineCounter = 1;
 	int positionOnLine = 1;
@@ -63,7 +54,9 @@ public class MyHeap{
 	    positionOnLine = positionOnLine + 1;
 	}
 	return s;
-	    
+    */
+    public String toString(){
+        return values.toString();
     }
     public static void main(String [] args){
 	MyHeap heap = new MyHeap(true);
@@ -73,6 +66,14 @@ public class MyHeap{
 	heap.add(9);
 	heap.add(2);
 	heap.add(3);
+	System.out.println(heap.toString() + "\n" + "\n");
+	heap.remove();
+	System.out.println(heap.toString() + "\n" + "\n");
+	heap.remove();
+	System.out.println(heap.toString() + "\n" + "\n");
+	heap.remove();
+	System.out.println(heap.toString() + "\n" + "\n");
+	heap.remove();
 	System.out.println(heap.toString() + "\n" + "\n");
 	MyHeap heap2 = new MyHeap(false);
 	heap2.add(1);
