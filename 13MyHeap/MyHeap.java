@@ -41,7 +41,12 @@ public class MyHeap{
 	if (values.get(maxIndex) < values.get(right)){
 	    maxIndex = right;
 	}
-	
+	if (index != maxIndex){
+	    int tempValue = values.get(index);
+	    values.set(index, values.get(maxIndex)):
+	    values.set(maxIndex, tempValue);
+	    fixHeap(maxIndex);
+	}
     }
     public int peek(){
 	return values.get(1);
