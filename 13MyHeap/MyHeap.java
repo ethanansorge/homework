@@ -33,7 +33,8 @@ public class MyHeap{
 	    return values.remove(1);
 	}
 	int value = values.get(1);
-	values.set(1, values.get(values.size() - 1);
+	values.set(1, values.get(values.size() - 1));
+	values.remove(values.size() - 1);
 	fixHeap(1);
 	return value;
 	
@@ -41,16 +42,16 @@ public class MyHeap{
     public void fixHeap(int index){
 	int extremeIndex = index;
 	int leftIndex = index * 2;
-	int rightIndex = leftIndex + 1;
-	if ((max && values.get(extremeIndex) < values.get(left)) || (!max && values.get(extremeIndex) > values.get(left))){
-	    extremeIndex = left;
+	int rightIndex = index * 2 + 1;
+	if (leftIndex < values.size() && ((max && values.get(extremeIndex) < values.get(leftIndex)) || (!max && values.get(extremeIndex) > values.get(leftIndex)))){
+	    extremeIndex = leftIndex;
 	}
-	if ((max && values.get(extremeIndex) < values.get(right)) || (!max && values.get(extremeIndex) > values.get(right))){
-	    extremeIndex = right;
+	if (rightIndex < values.size() && ((max && values.get(extremeIndex) < values.get(rightIndex)) || (!max && values.get(extremeIndex) > values.get(rightIndex)))){
+	    extremeIndex = rightIndex;
 	}
 	if (index != extremeIndex){
 	    int tempValue = values.get(index);
-	    values.set(index, values.get(extremeIndex)):
+	    values.set(index, values.get(extremeIndex));
 	    values.set(extremeIndex, tempValue);
 	    fixHeap(extremeIndex);
 	}
@@ -79,7 +80,7 @@ public class MyHeap{
         return values.toString();
     }
     public static void main(String [] args){
-	MyHeap heap = new MyHeap(true);
+	MyHeap heap = new MyHeap(false);
 	heap.add(1);
 	heap.add(7);
         heap.add(4);
@@ -95,7 +96,7 @@ public class MyHeap{
 	System.out.println(heap.toString() + "\n" + "\n");
 	heap.remove();
 	System.out.println(heap.toString() + "\n" + "\n");
-	MyHeap heap2 = new MyHeap(false);
+	/* MyHeap heap2 = new MyHeap(false);
 	heap2.add(1);
 	heap2.add(7);
         heap2.add(4);
@@ -103,6 +104,7 @@ public class MyHeap{
 	heap2.add(2);
 	heap2.add(3);
 	System.out.println(heap2.toString());
+	*/
     }
     
 }
