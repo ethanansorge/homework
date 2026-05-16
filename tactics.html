@@ -59,6 +59,7 @@
     SELECTED:  'SELECTED',   // unit selected, showing move/attack options
     ANIMATING: 'ANIMATING',  // unit animating along a path
     ACTION:    'ACTION',     // unit moved, choosing whether to attack
+    BUILDING:  'BUILDING',   // build menu open for a base
     GAME_OVER: 'GAME_OVER',
   };
 
@@ -113,6 +114,50 @@
           ctx.lineWidth = 0.5;
           ctx.strokeRect(x * TILE, y * TILE, TILE, TILE);
         }
+      }
+    }
+  }
+
+  // ================================================================
+  // BASE — a production structure owned by one team
+  // ================================================================
+  class Base {
+    constructor(team, gx, gy) {
+      this.team = team;   // 'blue' | 'red'
+      this.gx   = gx;
+      this.gy   = gy;
+    }
+
+    draw(ctx, isActive) {
+      const x = this.gx * TILE, y = this.gy * TILE;
+      const dark  = this.team === 'blue' ? '#1e3a8a' : '#7f1d1d';
+      const light = this.team === 'blue' ? '#93c5fd' : '#fca5a5';
+
+      // Building body
+      ctx.fillStyle = '#1f2937';
+      ctx.fillRect(x + 3, y + 3, TILE - 6, TILE - 6);
+
+      // Team-colored roof bar
+      ctx.fillStyle = dark;
+      ctx.fillRect(x + 3, y + 3, TILE - 6, 13);
+
+      // Team border
+      ctx.strokeStyle = light;
+      ctx.lineWidth   = 1.5;
+      ctx.strokeRect(x + 3, y + 3, TILE - 6, TILE - 6);
+
+      // "B" label
+      ctx.fillStyle    = light;
+      ctx.font         = `bold ${Math.floor(TILE * 0.27)}px monospace`;
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('B', x + TILE / 2, y + TILE / 2 + 5);
+
+      // Gold highlight when build menu is open for this base
+      if (isActive) {
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth   = 2.5;
+        ctx.strokeRect(x + 1, y + 1, TILE - 2, TILE - 2);
       }
     }
   }
@@ -268,7 +313,13 @@
       this.input = new Input(this.canvas);
       this.input.onClick = (gx, gy, px, py) => this._onClick(gx, gy, px, py);
 
-      // One infantry unit per team
+      // One base per team; units start on their base
+      this.bases = [
+        new Base('blue', 1, 1),
+        new Base('red', 10, 10),
+      ];
+
+      // One infantry unit per team, starting on their base
       this.units = [
         new Unit('blue', 1, 1),
         new Unit('red', 10, 10),
@@ -277,6 +328,10 @@
       this.state       = S.IDLE;
       this.currentTeam = 'blue';
       this.selected    = null;          // currently selected Unit
+
+      // Build menu state
+      this.buildingBase = null;         // Base whose menu is open
+      this.buildMenu    = null;         // { buildBtn, cancelBtn } pixel bounds
 
       // validMoves: Map<'x,y', Array<{x,y}>>  — key → path from unit to that tile
       this.validMoves   = new Map();
@@ -292,7 +347,7 @@
         dur:  0.14,   // seconds per tile step
       };
 
-      this.msg = "Blue's turn — click your unit.";
+      this.msg = "Blue's turn — click a unit or your Base (B) to build.";
 
       // End Turn button geometry
       this.btn = { x: CW - 150, y: GRID * TILE + 15, w: 132, h: 50 };
@@ -304,6 +359,10 @@
 
     unitAt(gx, gy) {
       return this.units.find(u => u.gx === gx && u.gy === gy) ?? null;
+    }
+
+    baseAt(gx, gy) {
+      return this.bases.find(b => b.gx === gx && b.gy === gy) ?? null;
     }
 
     cap(t) { return t === 'blue' ? 'Blue' : 'Red'; }
@@ -370,6 +429,8 @@
       this.selected     = null;
       this.validMoves   = new Map();
       this.validAttacks = new Set();
+      this.buildingBase = null;
+      this.buildMenu    = null;
       if (this.state !== S.GAME_OVER) this.state = S.IDLE;
     }
 
@@ -379,7 +440,37 @@
       this.units.filter(u => u.team === this.currentTeam).forEach(u => u.resetTurn());
       this.currentTeam = this.currentTeam === 'blue' ? 'red' : 'blue';
       this._deselect();
-      this.msg = `${this.cap(this.currentTeam)}'s turn — click your unit.`;
+      this.msg = `${this.cap(this.currentTeam)}'s turn — click a unit or Base (B) to build.`;
+    }
+
+    // ---- Build / production ----
+
+    _openBuildMenu(base) {
+      // Reject if the base tile is already occupied by any unit
+      if (this.unitAt(base.gx, base.gy)) {
+        this.msg = 'Base is occupied — move the unit off it first.';
+        return;
+      }
+      this.state        = S.BUILDING;
+      this.buildingBase = base;
+      // Pre-compute button bounds so _onClick can hit-test them
+      const cx = CW / 2, cy = (GRID * TILE) / 2;
+      const bw = 220, bh = 44;
+      this.buildMenu = {
+        buildBtn:  { x: cx - bw / 2, y: cy - 14, w: bw, h: bh },
+        cancelBtn: { x: cx - 44,     y: cy + 46, w: 88, h: 32 },
+      };
+      this.msg = `${this.cap(this.currentTeam)}: Choose a unit to produce.`;
+    }
+
+    _buildUnit(base) {
+      const unit       = new Unit(base.team, base.gx, base.gy);
+      // Newly built units cannot act until next turn
+      unit.hasMoved    = true;
+      unit.hasAttacked = true;
+      this.units.push(unit);
+      this._deselect();
+      this.msg = `${this.cap(base.team)}: Infantry built! It acts next turn.`;
     }
 
     // ---- Click handling ----
@@ -399,9 +490,26 @@
       const k       = this.key(gx, gy);
 
       if (this.state === S.IDLE) {
-        // Select a ready friendly unit
         if (clicked && clicked.team === this.currentTeam && !clicked.isExhausted) {
+          // Select a ready friendly unit
           this._select(clicked);
+        } else if (!clicked) {
+          // No unit on this tile — check for a friendly base
+          const base = this.baseAt(gx, gy);
+          if (base && base.team === this.currentTeam) {
+            this._openBuildMenu(base);
+          }
+        }
+
+      } else if (this.state === S.BUILDING) {
+        const m = this.buildMenu;
+        const bb = m.buildBtn, cb = m.cancelBtn;
+        if (px >= bb.x && px <= bb.x + bb.w && py >= bb.y && py <= bb.y + bb.h) {
+          this._buildUnit(this.buildingBase);
+        } else {
+          // Click anywhere outside the build button (including Cancel) closes the menu
+          this._deselect();
+          this.msg = `${this.cap(this.currentTeam)}'s turn — click a unit or Base (B) to build.`;
         }
 
       } else if (this.state === S.SELECTED) {
@@ -502,12 +610,18 @@
       attacker.hasAttacked = true;
 
       if (defender.hp <= 0) {
-        this.units      = this.units.filter(u => u !== defender);
-        this.state      = S.GAME_OVER;
-        this.selected   = null;
-        this.validMoves = new Map();
-        this.validAttacks = new Set();
-        this.msg = `${this.cap(this.currentTeam)} wins! ${this.cap(defender.team)} unit destroyed!`;
+        this.units = this.units.filter(u => u !== defender);
+        // Win only when ALL enemy units are gone
+        if (!this.units.some(u => u.team === defender.team)) {
+          this.state        = S.GAME_OVER;
+          this.selected     = null;
+          this.validMoves   = new Map();
+          this.validAttacks = new Set();
+          this.msg = `${this.cap(this.currentTeam)} wins! All ${this.cap(defender.team)} units destroyed!`;
+          return;
+        }
+        this.msg = `Hit! ${dmg} damage. ${this.cap(defender.team)} unit destroyed — ${this.units.filter(u => u.team === defender.team).length} remain.`;
+        this._deselect();
         return;
       }
 
@@ -524,7 +638,10 @@
       // 1. Terrain
       this.map.draw(ctx);
 
-      // 2. Movement overlay (blue)
+      // 2. Bases (drawn on top of terrain, below overlays)
+      this._drawBases(ctx);
+
+      // 3. Movement overlay (blue)
       if (this.state === S.SELECTED) {
         for (const [k] of this.validMoves) {
           const { x, y } = this.fromKey(k);
@@ -563,10 +680,85 @@
       // 6. UI panel
       this._drawUI(ctx);
 
-      // 7. Game-over overlay (on top of everything)
+      // 7. Build menu overlay
+      if (this.state === S.BUILDING) {
+        this._drawBuildMenu(ctx);
+      }
+
+      // 8. Game-over overlay (on top of everything)
       if (this.state === S.GAME_OVER) {
         this._drawGameOver(ctx);
       }
+    }
+
+    _drawBases(ctx) {
+      for (const base of this.bases) {
+        base.draw(ctx, this.state === S.BUILDING && this.buildingBase === base);
+      }
+    }
+
+    _drawBuildMenu(ctx) {
+      const cx = CW / 2, cy = (GRID * TILE) / 2;
+      const pw = 260, ph = 180;
+      const px = cx - pw / 2, py = cy - ph / 2;
+      const m  = this.buildMenu;
+      const teamColor = this.buildingBase.team === 'blue' ? '#3b82f6' : '#ef4444';
+      const teamLight = this.buildingBase.team === 'blue' ? '#93c5fd' : '#fca5a5';
+
+      // Dim everything behind the menu
+      ctx.fillStyle = 'rgba(0,0,0,0.55)';
+      ctx.fillRect(0, 0, CW, GRID * TILE);
+
+      // Panel background
+      ctx.fillStyle   = '#111827';
+      ctx.strokeStyle = teamColor;
+      ctx.lineWidth   = 2.5;
+      ctx.fillRect(px, py, pw, ph);
+      ctx.strokeRect(px, py, pw, ph);
+
+      // Title bar
+      ctx.fillStyle = teamColor;
+      ctx.fillRect(px, py, pw, 32);
+      ctx.fillStyle    = '#fff';
+      ctx.font         = 'bold 13px monospace';
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`${this.cap(this.buildingBase.team).toUpperCase()} BASE — BUILD UNIT`, cx, py + 16);
+
+      // Infantry option button
+      const bb = m.buildBtn;
+      const hovBuild = this.input.px >= bb.x && this.input.px <= bb.x + bb.w &&
+                       this.input.py >= bb.y && this.input.py <= bb.y + bb.h;
+      ctx.fillStyle   = hovBuild ? '#1e3a5f' : '#1e293b';
+      ctx.strokeStyle = hovBuild ? teamLight : '#334155';
+      ctx.lineWidth   = 1.5;
+      ctx.fillRect(bb.x, bb.y, bb.w, bb.h);
+      ctx.strokeRect(bb.x, bb.y, bb.w, bb.h);
+
+      // Infantry label
+      ctx.fillStyle    = teamLight;
+      ctx.font         = 'bold 14px monospace';
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('Infantry', cx, bb.y + 14);
+      ctx.fillStyle = '#64748b';
+      ctx.font      = '11px monospace';
+      ctx.fillText('HP: 10   Move: 3   Attack: 1', cx, bb.y + 31);
+
+      // Cancel button
+      const cb = m.cancelBtn;
+      const hovCancel = this.input.px >= cb.x && this.input.px <= cb.x + cb.w &&
+                        this.input.py >= cb.y && this.input.py <= cb.y + cb.h;
+      ctx.fillStyle   = hovCancel ? '#374151' : '#1f2937';
+      ctx.strokeStyle = '#4b5563';
+      ctx.lineWidth   = 1;
+      ctx.fillRect(cb.x, cb.y, cb.w, cb.h);
+      ctx.strokeRect(cb.x, cb.y, cb.w, cb.h);
+      ctx.fillStyle    = '#9ca3af';
+      ctx.font         = '12px monospace';
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('Cancel', cx, cb.y + cb.h / 2);
     }
 
     _drawUI(ctx) {
