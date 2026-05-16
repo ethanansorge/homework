@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tactics</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0f172a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'Courier New', monospace;
+      user-select: none;
+    }
+    #title {
+      color: #93c5fd;
+      font-size: 1.4rem;
+      letter-spacing: 5px;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+    #gameCanvas {
+      cursor: pointer;
+      display: block;
+      box-shadow: 0 0 40px rgba(0,0,0,0.9);
+    }
+  </style>
+</head>
+<body>
+  <div id="title">TACTICS</div>
+  <canvas id="gameCanvas"></canvas>
+  <script>
+  'use strict';
+
+  // ================================================================
+  // CONSTANTS
+  // ================================================================
+  const TILE = 52;                        // pixel size of each grid cell
+  const GRID = 12;                        // grid is GRID x GRID
+  const UI_H = 82;                        // height of the info panel below the grid
+  const CW = TILE * GRID;                 // canvas width
+  const CH = TILE * GRID + UI_H;          // canvas height
+
+  // Terrain type definitions: color used for rendering, moveCost for pathfinding
+  const TERRAIN = {
+    PLAIN:    { color: '#5a9e48', moveCost: 1 },
+    FOREST:   { color: '#376328', moveCost: 2 },
+    MOUNTAIN: { color: '#7a6248', moveCost: Infinity },
+    WATER:    { color: '#2a5f8e', moveCost: Infinity },
+    ROAD:     { color: '#b8a860', moveCost: 1 },
+  };
+
+  // Game state enum
+  const S = {
+    IDLE:      'IDLE',       // no unit selected
+    SELECTED:  'SELECTED',   // unit selected, showing move/attack options
+    ANIMATING: 'ANIMATING',  // unit animating along a path
+    ACTION:    'ACTION',     // unit moved, choosing whether to attack
+    GAME_OVER: 'GAME_OVER',
+  };
+
+  const DIRS = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+
+  // ================================================================
+  // TILEMAP — stores terrain and renders the grid
+  // ================================================================
+  class TileMap {
+    constructor() {
+      // 0=plain  1=forest  2=mountain  3=water  4=road
+      const layout = [
+        [0,0,0,0,0,1,1,0,0,0,0,0],
+        [0,2,0,0,0,0,0,0,0,2,0,0],
+        [0,0,0,3,3,3,0,0,0,0,0,0],
+        [0,0,0,3,0,0,0,0,0,0,1,0],
+        [0,1,0,0,0,0,0,2,0,0,1,0],
+        [0,1,0,0,0,4,4,4,4,0,0,0],
+        [0,0,0,0,4,4,0,0,0,0,1,0],
+        [0,0,2,0,0,0,0,0,0,0,1,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,1,3,3,0,0,2,0],
+        [0,1,0,0,0,1,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0],
+      ];
+      const types = [
+        TERRAIN.PLAIN, TERRAIN.FOREST, TERRAIN.MOUNTAIN,
+        TERRAIN.WATER, TERRAIN.ROAD,
+      ];
+      this.tiles = layout.map(row => row.map(i => types[i]));
+    }
+
+    // Returns terrain object at (x, y), or null if out of bounds
+    get(x, y) {
+      if (x < 0 || x >= GRID || y < 0 || y >= GRID) return null;
+      return this.tiles[y][x];
+    }
+
+    // Movement cost to enter (x, y); Infinity = impassable
+    moveCost(x, y) {
+      const t = this.get(x, y);
+      return t ? t.moveCost : Infinity;
+    }
+
+    draw(ctx) {
+      for (let y = 0; y < GRID; y++) {
+        for (let x = 0; x < GRID; x++) {
+          ctx.fillStyle = this.tiles[y][x].color;
+          ctx.fillRect(x * TILE, y * TILE, TILE, TILE);
+          // subtle grid line
+          ctx.strokeStyle = 'rgba(0,0,0,0.18)';
+          ctx.lineWidth = 0.5;
+          ctx.strokeRect(x * TILE, y * TILE, TILE, TILE);
+        }
+      }
+    }
+  }
+
+  // ================================================================
+  // UNIT — a single combatant on the board
+  // ================================================================
+  class Unit {
+    constructor(team, gx, gy) {
+      this.team = team;           // 'blue' | 'red'
+      this.gx = gx;               // grid column
+      this.gy = gy;               // grid row
+      this.px = gx * TILE + TILE / 2;  // pixel center X (used for animation)
+      this.py = gy * TILE + TILE / 2;  // pixel center Y
+      this.hp = 10;
+      this.maxHp = 10;
+      this.moveRange = 3;
+      this.hasMoved = false;
+      this.hasAttacked = false;
+    }
+
+    get isExhausted() {
+      return this.hasMoved && this.hasAttacked;
+    }
+
+    resetTurn() {
+      this.hasMoved = false;
+      this.hasAttacked = false;
+    }
+
+    // Snap pixel position to current grid position (called after animation ends)
+    snapToGrid() {
+      this.px = this.gx * TILE + TILE / 2;
+      this.py = this.gy * TILE + TILE / 2;
+    }
+
+    draw(ctx, isSelected) {
+      const cx = this.px, cy = this.py;
+      const r = TILE * 0.30;
+      const color = this.team === 'blue' ? '#3b82f6' : '#ef4444';
+
+      // Drop shadow
+      ctx.beginPath();
+      ctx.arc(cx + 2, cy + 3, r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0,0,0,0.35)';
+      ctx.fill();
+
+      // Body circle
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+
+      // Glossy highlight
+      ctx.beginPath();
+      ctx.arc(cx - r * 0.3, cy - r * 0.3, r * 0.42, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.22)';
+      ctx.fill();
+
+      // Outline — white when selected
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.strokeStyle = isSelected ? '#ffffff' : 'rgba(0,0,0,0.55)';
+      ctx.lineWidth = isSelected ? 3 : 1.5;
+      ctx.stroke();
+
+      // Pulsing selection ring
+      if (isSelected) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, r + 5, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+
+      // Exhausted dark overlay
+      if (this.isExhausted) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0,0,0,0.48)';
+        ctx.fill();
+      }
+
+      // HP number centered in circle
+      ctx.font = `bold ${Math.floor(TILE * 0.22)}px monospace`;
+      ctx.fillStyle = '#fff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(this.hp, cx, cy + 1);
+
+      // HP bar below circle
+      const bw = TILE - 12, bh = 4;
+      const bx = cx - bw / 2, by = cy + r + 4;
+      ctx.fillStyle = '#111827';
+      ctx.fillRect(bx, by, bw, bh);
+      const ratio = this.hp / this.maxHp;
+      ctx.fillStyle = ratio > 0.5 ? '#22c55e' : ratio > 0.25 ? '#f59e0b' : '#ef4444';
+      ctx.fillRect(bx, by, bw * ratio, bh);
+    }
+  }
+
+  // ================================================================
+  // INPUT — captures mouse position and click events
+  // ================================================================
+  class Input {
+    constructor(canvas) {
+      this.gx = -1;   // hovered grid X
+      this.gy = -1;   // hovered grid Y
+      this.px = -1;   // raw pixel X (within canvas)
+      this.py = -1;   // raw pixel Y
+      this.onClick = null;  // Game registers a handler here
+
+      canvas.addEventListener('mousemove', e => {
+        const r = canvas.getBoundingClientRect();
+        this.px = e.clientX - r.left;
+        this.py = e.clientY - r.top;
+        const gx = Math.floor(this.px / TILE);
+        const gy = Math.floor(this.py / TILE);
+        this.gx = (gx >= 0 && gx < GRID && gy >= 0 && gy < GRID) ? gx : -1;
+        this.gy = (gx >= 0 && gx < GRID && gy >= 0 && gy < GRID) ? gy : -1;
+      });
+
+      canvas.addEventListener('mouseleave', () => {
+        this.gx = this.gy = this.px = this.py = -1;
+      });
+
+      canvas.addEventListener('click', e => {
+        const r = canvas.getBoundingClientRect();
+        const px = e.clientX - r.left;
+        const py = e.clientY - r.top;
+        if (this.onClick) {
+          this.onClick(
+            Math.floor(px / TILE),
+            Math.floor(py / TILE),
+            px, py
+          );
+        }
+      });
+    }
+  }
+
+  // ================================================================
+  // GAME — state machine, logic, and rendering orchestration
+  // ================================================================
+  class Game {
+    constructor() {
+      this.canvas = document.getElementById('gameCanvas');
+      this.canvas.width  = CW;
+      this.canvas.height = CH;
+      this.ctx = this.canvas.getContext('2d');
+
+      this.map   = new TileMap();
+      this.input = new Input(this.canvas);
+      this.input.onClick = (gx, gy, px, py) => this._onClick(gx, gy, px, py);
+
+      // One infantry unit per team
+      this.units = [
+        new Unit('blue', 1, 1),
+        new Unit('red', 10, 10),
+      ];
+
+      this.state       = S.IDLE;
+      this.currentTeam = 'blue';
+      this.selected    = null;          // currently selected Unit
+
+      // validMoves: Map<'x,y', Array<{x,y}>>  — key → path from unit to that tile
+      this.validMoves   = new Map();
+      // validAttacks: Set<'x,y'>              — tiles containing attackable enemies
+      this.validAttacks = new Set();
+
+      // Animation state
+      this.anim = {
+        unit: null,   // Unit being moved
+        path: [],     // full path [{x,y}, ...] including start position
+        step: 0,      // which segment we're on (path[step] → path[step+1])
+        t:    0,      // time elapsed in current segment (seconds)
+        dur:  0.14,   // seconds per tile step
+      };
+
+      this.msg = "Blue's turn — click your unit.";
+
+      // End Turn button geometry
+      this.btn = { x: CW - 150, y: GRID * TILE + 15, w: 132, h: 50 };
+
+      this._loop();
+    }
+
+    // ---- Helpers ----
+
+    unitAt(gx, gy) {
+      return this.units.find(u => u.gx === gx && u.gy === gy) ?? null;
+    }
+
+    cap(t) { return t === 'blue' ? 'Blue' : 'Red'; }
+
+    key(x, y) { return `${x},${y}`; }
+    fromKey(k) { const [x, y] = k.split(',').map(Number); return { x, y }; }
+
+    // ---- Dijkstra-based movement range ----
+
+    _computeMoves(unit) {
+      const result = new Map();   // key → path
+      const best   = new Map();   // key → cheapest cost seen
+      // Queue entries: { x, y, cost, path }
+      const queue = [{ x: unit.gx, y: unit.gy, cost: 0, path: [] }];
+      best.set(this.key(unit.gx, unit.gy), 0);
+
+      while (queue.length > 0) {
+        // Extract minimum-cost entry (small grid, simple sort is fine)
+        queue.sort((a, b) => a.cost - b.cost);
+        const { x, y, cost, path } = queue.shift();
+
+        for (const [dx, dy] of DIRS) {
+          const nx = x + dx, ny = y + dy;
+          const k  = this.key(nx, ny);
+          const tc = this.map.moveCost(nx, ny);
+          const nc = cost + tc;
+
+          if (tc === Infinity || nc > unit.moveRange) continue;
+          if (this.unitAt(nx, ny)) continue;  // blocked by any unit
+
+          if (!best.has(k) || best.get(k) > nc) {
+            best.set(k, nc);
+            const newPath = [...path, { x: nx, y: ny }];
+            result.set(k, newPath);
+            queue.push({ x: nx, y: ny, cost: nc, path: newPath });
+          }
+        }
+      }
+      return result;
+    }
+
+    // Returns Set of keys for enemy tiles adjacent to (fromX, fromY)
+    _computeAttacks(unit, fromX, fromY) {
+      const result = new Set();
+      for (const [dx, dy] of DIRS) {
+        const nx = fromX + dx, ny = fromY + dy;
+        const t  = this.unitAt(nx, ny);
+        if (t && t.team !== unit.team) result.add(this.key(nx, ny));
+      }
+      return result;
+    }
+
+    // ---- State helpers ----
+
+    _select(unit) {
+      this.selected     = unit;
+      this.validMoves   = this._computeMoves(unit);
+      this.validAttacks = this._computeAttacks(unit, unit.gx, unit.gy);
+      this.state        = S.SELECTED;
+      this.msg          = `${this.cap(this.currentTeam)}: Choose destination or attack adjacent enemy.`;
+    }
+
+    _deselect() {
+      this.selected     = null;
+      this.validMoves   = new Map();
+      this.validAttacks = new Set();
+      if (this.state !== S.GAME_OVER) this.state = S.IDLE;
+    }
+
+    _endTurn() {
+      if (this.state === S.ANIMATING || this.state === S.GAME_OVER) return;
+      // Reset all units belonging to the current team
+      this.units.filter(u => u.team === this.currentTeam).forEach(u => u.resetTurn());
+      this.currentTeam = this.currentTeam === 'blue' ? 'red' : 'blue';
+      this._deselect();
+      this.msg = `${this.cap(this.currentTeam)}'s turn — click your unit.`;
+    }
+
+    // ---- Click handling ----
+
+    _onClick(gx, gy, px, py) {
+      // Check end-turn button first (it lives in the UI panel below the grid)
+      const b = this.btn;
+      if (px >= b.x && px <= b.x + b.w && py >= b.y && py <= b.y + b.h) {
+        this._endTurn();
+        return;
+      }
+
+      if (this.state === S.ANIMATING || this.state === S.GAME_OVER) return;
+      if (gx < 0 || gx >= GRID || gy < 0 || gy >= GRID) return;
+
+      const clicked = this.unitAt(gx, gy);
+      const k       = this.key(gx, gy);
+
+      if (this.state === S.IDLE) {
+        // Select a ready friendly unit
+        if (clicked && clicked.team === this.currentTeam && !clicked.isExhausted) {
+          this._select(clicked);
+        }
+
+      } else if (this.state === S.SELECTED) {
+        const unit = this.selected;
+
+        if (clicked === unit) {
+          // Click self → deselect
+          this._deselect();
+        } else if (this.validAttacks.has(k)) {
+          // Attack adjacent enemy without moving
+          this._attack(unit, clicked);
+        } else if (this.validMoves.has(k)) {
+          // Move to reachable tile
+          this._beginMove(unit, this.validMoves.get(k));
+        } else if (clicked && clicked.team === this.currentTeam && !clicked.isExhausted) {
+          // Switch to another friendly unit
+          this._select(clicked);
+        } else {
+          this._deselect();
+        }
+
+      } else if (this.state === S.ACTION) {
+        // Unit has moved; only action left is attacking
+        if (this.validAttacks.has(k)) {
+          this._attack(this.selected, clicked);
+        } else {
+          this._deselect();
+        }
+      }
+    }
+
+    // ---- Movement animation ----
+
+    _beginMove(unit, path) {
+      const a    = this.anim;
+      a.unit     = unit;
+      a.path     = [{ x: unit.gx, y: unit.gy }, ...path]; // include start
+      a.step     = 0;
+      a.t        = 0;
+      this.state = S.ANIMATING;
+    }
+
+    _tickAnim(dt) {
+      if (this.state !== S.ANIMATING) return;
+
+      const a       = this.anim;
+      const total   = a.path.length - 1;  // number of segments to traverse
+
+      a.t += dt;
+
+      // Advance through as many segments as dt allows
+      while (a.t >= a.dur && a.step < total) {
+        a.t    -= a.dur;
+        a.step += 1;
+      }
+
+      // Animation complete
+      if (a.step >= total) {
+        const dest = a.path[a.path.length - 1];
+        a.unit.gx  = dest.x;
+        a.unit.gy  = dest.y;
+        a.unit.snapToGrid();
+        a.unit.hasMoved = true;
+
+        this.validMoves   = new Map();
+        this.validAttacks = this._computeAttacks(a.unit, dest.x, dest.y);
+
+        if (this.validAttacks.size > 0) {
+          this.state = S.ACTION;
+          this.msg   = `${this.cap(this.currentTeam)}: Click enemy to attack, or End Turn.`;
+        } else {
+          // No enemies in range; unit's turn is fully spent
+          a.unit.hasAttacked = true;
+          this._deselect();
+          this.msg = `${this.cap(this.currentTeam)}: No targets in range. End Turn when ready.`;
+        }
+        return;
+      }
+
+      // Interpolate pixel position between current segment endpoints
+      const progress = a.t / a.dur;
+      // Smooth ease-in-out curve: 3t² - 2t³
+      const ease = progress * progress * (3 - 2 * progress);
+      const from = a.path[a.step];
+      const to   = a.path[a.step + 1];
+      a.unit.px  = (from.x + (to.x - from.x) * ease) * TILE + TILE / 2;
+      a.unit.py  = (from.y + (to.y - from.y) * ease) * TILE + TILE / 2;
+    }
+
+    // ---- Combat ----
+
+    _attack(attacker, defender) {
+      if (!defender) return;
+
+      const dmg    = 3 + Math.floor(Math.random() * 3);  // 3–5 damage
+      defender.hp  = Math.max(0, defender.hp - dmg);
+      attacker.hasMoved    = true;
+      attacker.hasAttacked = true;
+
+      if (defender.hp <= 0) {
+        this.units      = this.units.filter(u => u !== defender);
+        this.state      = S.GAME_OVER;
+        this.selected   = null;
+        this.validMoves = new Map();
+        this.validAttacks = new Set();
+        this.msg = `${this.cap(this.currentTeam)} wins! ${this.cap(defender.team)} unit destroyed!`;
+        return;
+      }
+
+      this.msg = `Hit! ${dmg} damage dealt. ${this.cap(defender.team)} has ${defender.hp} HP remaining.`;
+      this._deselect();
+    }
+
+    // ---- Rendering ----
+
+    draw() {
+      const ctx = this.ctx;
+      ctx.clearRect(0, 0, CW, CH);
+
+      // 1. Terrain
+      this.map.draw(ctx);
+
+      // 2. Movement overlay (blue)
+      if (this.state === S.SELECTED) {
+        for (const [k] of this.validMoves) {
+          const { x, y } = this.fromKey(k);
+          ctx.fillStyle   = 'rgba(59,130,246,0.28)';
+          ctx.fillRect(x * TILE, y * TILE, TILE, TILE);
+          ctx.strokeStyle = 'rgba(59,130,246,0.70)';
+          ctx.lineWidth   = 1.5;
+          ctx.strokeRect(x * TILE + 1, y * TILE + 1, TILE - 2, TILE - 2);
+        }
+      }
+
+      // 3. Attack overlay (red) — shown when a unit is selected or has moved
+      if (this.state === S.SELECTED || this.state === S.ACTION) {
+        for (const k of this.validAttacks) {
+          const { x, y } = this.fromKey(k);
+          ctx.fillStyle   = 'rgba(239,68,68,0.38)';
+          ctx.fillRect(x * TILE, y * TILE, TILE, TILE);
+          ctx.strokeStyle = 'rgba(239,68,68,0.85)';
+          ctx.lineWidth   = 2;
+          ctx.strokeRect(x * TILE + 2, y * TILE + 2, TILE - 4, TILE - 4);
+        }
+      }
+
+      // 4. Hover highlight (grid cells only)
+      const hx = this.input.gx, hy = this.input.gy;
+      if (hx >= 0 && hy >= 0) {
+        ctx.fillStyle = 'rgba(255,255,255,0.09)';
+        ctx.fillRect(hx * TILE, hy * TILE, TILE, TILE);
+      }
+
+      // 5. Units
+      for (const unit of this.units) {
+        unit.draw(ctx, unit === this.selected);
+      }
+
+      // 6. UI panel
+      this._drawUI(ctx);
+
+      // 7. Game-over overlay (on top of everything)
+      if (this.state === S.GAME_OVER) {
+        this._drawGameOver(ctx);
+      }
+    }
+
+    _drawUI(ctx) {
+      const y0 = GRID * TILE;
+
+      // Panel background
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, y0, CW, UI_H);
+
+      // Divider
+      ctx.strokeStyle = '#1e3a5f';
+      ctx.lineWidth   = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, y0); ctx.lineTo(CW, y0);
+      ctx.stroke();
+
+      // Team color indicator dot
+      const dotColor = this.currentTeam === 'blue' ? '#3b82f6' : '#ef4444';
+      ctx.beginPath();
+      ctx.arc(24, y0 + 24, 9, 0, Math.PI * 2);
+      ctx.fillStyle = dotColor;
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+      ctx.lineWidth   = 1.5;
+      ctx.stroke();
+
+      // Turn label
+      ctx.fillStyle    = '#f1f5f9';
+      ctx.font         = 'bold 14px monospace';
+      ctx.textAlign    = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`${this.cap(this.currentTeam)}'s Turn`, 40, y0 + 24);
+
+      // Status message
+      ctx.fillStyle = '#64748b';
+      ctx.font      = '11px monospace';
+      ctx.fillText(this.msg, 14, y0 + 56);
+
+      // End Turn button
+      if (this.state !== S.GAME_OVER) {
+        const b   = this.btn;
+        const hov = this._btnHovered();
+        ctx.fillStyle   = hov ? '#14532d' : '#0d3a1f';
+        ctx.strokeStyle = hov ? '#4ade80' : '#166534';
+        ctx.lineWidth   = 2;
+        ctx.beginPath();
+        ctx.rect(b.x, b.y, b.w, b.h);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle    = hov ? '#f0fdf4' : '#86efac';
+        ctx.font         = 'bold 13px monospace';
+        ctx.textAlign    = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('End Turn', b.x + b.w / 2, b.y + b.h / 2);
+      }
+    }
+
+    _drawGameOver(ctx) {
+      // Dim the grid
+      ctx.fillStyle = 'rgba(0,0,0,0.62)';
+      ctx.fillRect(0, 0, CW, GRID * TILE);
+
+      const cx = CW / 2, cy = (GRID * TILE) / 2;
+      const bw = 360, bh = 130;
+
+      // Banner box
+      ctx.fillStyle   = '#111827';
+      ctx.strokeStyle = this.currentTeam === 'blue' ? '#3b82f6' : '#ef4444';
+      ctx.lineWidth   = 3;
+      ctx.fillRect(cx - bw / 2, cy - bh / 2, bw, bh);
+      ctx.strokeRect(cx - bw / 2, cy - bh / 2, bw, bh);
+
+      // Winner text
+      ctx.fillStyle    = this.currentTeam === 'blue' ? '#93c5fd' : '#fca5a5';
+      ctx.font         = 'bold 30px monospace';
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`${this.cap(this.currentTeam)} Team Wins!`, cx, cy - 20);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font      = '13px monospace';
+      ctx.fillText('Enemy unit destroyed', cx, cy + 18);
+
+      ctx.fillStyle = '#475569';
+      ctx.font      = '11px monospace';
+      ctx.fillText('Refresh the page to play again', cx, cy + 44);
+    }
+
+    _btnHovered() {
+      const { px, py } = this.input;
+      const b = this.btn;
+      return px >= b.x && px <= b.x + b.w && py >= b.y && py <= b.y + b.h;
+    }
+
+    // ---- Game loop ----
+
+    _loop() {
+      let last = 0;
+      const tick = (ts) => {
+        const dt = Math.min((ts - last) / 1000, 0.1);  // delta time in seconds, capped
+        last = ts;
+        this._tickAnim(dt);
+        this.draw();
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    }
+  }
+
+  // Boot
+  new Game();
+  </script>
+</body>
+</html>
